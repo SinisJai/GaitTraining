@@ -1,0 +1,78 @@
+<resources>
+    <string name="app_name">mSWAY</string>
+
+    <!-- General strings -->
+    <string name="back">Indietro</string>
+    <string name="save">Salva</string>
+    <string name="ok">OK</string>
+    <string name="yes">Si</string>
+    <string name="no">No</string>
+    <string name="logout">Esci</string>
+
+    <!-- Main Activity -->
+    <string name="app_description">Gait training</string>
+    <string name="patient_mode">Paziente</string>
+    <string name="clinician_mode">Clinico</string>
+
+    <!-- Login Activity -->
+    <string name="clinician_login">Login Clinico</string>
+    <string name="login_description">Inserisci le credenziali per accedere</string>
+    <string name="username">Nome Utente</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="empty_fields_error">Nome utente e password non possono essere vuoti</string>
+    <string name="invalid_credentials">Credenziali non valide</string>
+
+    <!-- Patient Activity -->
+    <string name="patient_panel">Area paziente</string>
+    <string name="training_details">Dettagli allenamento</string>
+    <string name="training_duration_label">Durata allenamento</string>
+    <string name="training_duration_value">Durata Allenamento: %d minuti</string>
+    <string name="best_cadence_label">Obbiettivo</string>
+    <string name="best_cadence_value">Obbiettivo: %.1f passi/min</string>
+    <string name="selected_music">Musica Selezionata: %s</string>
+    <string name="start_training">Inizia Allenamento</string>
+    <string name="select_music">Seleziona la Musica</string>
+    <string name="no_training_duration_set">Non è stata inserita la durata allenamento</string>
+    <string name="no_cadence_recorded">Non è stato inserito un obbiettivo</string>
+    <string name="setup_required">Per favore chiedi al clinico di impostare il tuo allenamento</string>
+
+    <!-- Clinician Activity -->
+    <string name="clinician_panel">Area clinico</string>
+    <string name="training_duration_settings">Impostazioni durata allenamento</string>
+    <string name="training_duration_minutes">Durata allenamento: %d minuti</string>
+    <string name="cadence_settings">Impostazioni cadenza</string>
+    <string name="manual_cadence_entry">Inserimento manuale cadenza</string>
+    <string name="sensor_based_cadence">Misurazione cadenza tramite sensori</string>
+    <string name="enter_cadence_steps_per_minute">Inserisci cadenza (passi al minuto)</string>
+    <string name="measure_cadence">Misura cadenza</string>
+    <string name="stop_measuring">Interrompi rilevamento</string>
+    <string name="sensor_instructions">Prima della misurazione, posizionare i sensori sui piedi e sulla schiena</string>
+    <string name="save_settings">Salva impostazioni</string>
+    <string name="settings_saved">Impostazioni salvate con successo</string>
+    <string name="invalid_cadence">Inserire un valore di cadenza valido</string>
+    <string name="sensors_not_available">I sensori necessari non sono disponibili su questo dispositivo</string>
+    <string name="measuring_cadence">Rilevamento cadenza, camminare normalmente…</string>
+    <string name="cadence_measured">Cadenza misurata: %.1f passi/min</string>
+
+    <!-- Music Selection Activity -->
+    <string name="select_music_genre">Seleziona il genere musicale</string>
+    <string name="music_selection_instructions">Scegli un genere musicale per la tua sessione di allenamento</string>
+    <string name="no_music_selected">Nessun genere musicale selezionato</string>
+    <string name="currently_selected_genre">Selezione corrente: %s</string>
+    <string name="music_genre_selected">Genere selezionato: %s </string>
+
+    <!-- Training Activity -->
+    <string name="training_session">Sessione di allenamento</string>
+    <string name="training_info">Informazioni allenamento</string>
+    <string name="current_cadence_value">Cadenza attuale: %.1f passi/min</string>
+    <string name="target_cadence_value">Obbiettivo: %.1f passi/min</string>
+    <string name="music_genre_value">Genere musicale: %s</string>
+    <string name="training_instructions">Segui il ritmo e cerca di mantenere obbiettivo di cadenza</string>
+    <string name="stop_training">Interrompi Allenamento</string>
+    <string name="stop_training_confirmation">Vuoi interrompere la sessione di allenamento?</string>
+    <string name="training_complete">Allenamento Completato!</string>
+    <string name="training_complete_message">La tua sessione di allenamento è stata completata con successo.</string>
+    <string name="invalid_training_config">Allenamento impostato non valido. Per favore contatta il clinico.</string>
+    <string name="starting_in">Cominciamo in %d…</string>
+</resources>
