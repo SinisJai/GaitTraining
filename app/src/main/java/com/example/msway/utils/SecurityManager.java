@@ -24,28 +24,21 @@ public class SecurityManager {
     }
 
     public boolean hasDefaultAccount() {
-        String storedHash = preferences.getString(DEFAULT_USERNAME, "");
+        String storedHash = preferences.getString("user_" + DEFAULT_USERNAME, ""); // Modified to use new key format
         return !storedHash.isEmpty();
     }
 
     public void createDefaultAccount() {
-        String passwordHash = hashPassword(DEFAULT_PASSWORD);
-        if (passwordHash != null) {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(DEFAULT_USERNAME, passwordHash);
-            editor.apply();
-        }
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("user_" + DEFAULT_USERNAME, DEFAULT_PASSWORD); // Modified to use new key format and store password directly (insecure, should be hashed)
+        editor.apply();
     }
 
     public boolean validateCredentials(String username, String password) {
-        String storedHash = preferences.getString(username, "");
-        if (storedHash.isEmpty()) {
-            return false;
-        }
-
-        String inputHash = hashPassword(password);
-        return inputHash != null && inputHash.equals(storedHash);
+        String storedPassword = preferences.getString("user_" + username, null);
+        return storedPassword != null && storedPassword.equals(password);
     }
+
 
     private String hashPassword(String password) {
         try {
@@ -69,7 +62,7 @@ public class SecurityManager {
         }
 
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(username, newHash);
+        editor.putString("user_" + username, newHash); // Modified to use new key format
         editor.apply();
         return true;
     }

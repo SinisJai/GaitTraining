@@ -70,7 +70,12 @@ public class ClinicianActivity extends AppCompatActivity {
         sessionManager = new SessionManager(getApplicationContext());
         sensorManager = new SensorManager(this);
 
-        // Set up training duration slider
+        setupTrainingDurationControls();
+        setupCadenceControls();
+        setupButtons();
+    }
+
+    private void setupTrainingDurationControls() {
         sbTrainingDuration.setMin(1);
         sbTrainingDuration.setMax(30);
         sbTrainingDuration.setProgress(trainingDuration);
@@ -89,41 +94,24 @@ public class ClinicianActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
+    }
 
-        // Handle radio group changes
-        rgCadenceMethod.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                updateCadenceMethod();
-            }
-        });
-
-        btnMeasureCadence.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isMeasuringSensors) {
-                    startSensorMeasurement();
-                } else {
-                    stopSensorMeasurement();
-                }
-            }
-        });
-
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveSettings();
-            }
-        });
-
-        btnLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logout();
-            }
-        });
-
+    private void setupCadenceControls() {
+        rgCadenceMethod.setOnCheckedChangeListener((group, checkedId) -> updateCadenceMethod());
         updateCadenceMethod();
+    }
+
+    private void setupButtons() {
+        btnMeasureCadence.setOnClickListener(v -> {
+            if (!isMeasuringSensors) {
+                startSensorMeasurement();
+            } else {
+                stopSensorMeasurement();
+            }
+        });
+
+        btnSave.setOnClickListener(v -> saveSettings());
+        btnLogout.setOnClickListener(v -> logout());
     }
 
     private void updateTrainingDurationText() {
@@ -132,7 +120,6 @@ public class ClinicianActivity extends AppCompatActivity {
 
     private void updateCadenceMethod() {
         boolean isManual = rbManualCadence.isChecked();
-
         etManualCadence.setEnabled(isManual);
         btnMeasureCadence.setEnabled(!isManual);
 
@@ -150,20 +137,12 @@ public class ClinicianActivity extends AppCompatActivity {
         isMeasuringSensors = true;
         btnMeasureCadence.setText(R.string.stop_measuring);
 
-        sensorManager.startMeasuring(new SensorManager.OnCadenceMeasuredListener() {
-            @Override
-            public void onCadenceMeasured(final float cadence) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        bestCadence = cadence;
-                        Toast.makeText(ClinicianActivity.this,
-                                getString(R.string.cadence_measured, bestCadence),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
+        sensorManager.startMeasuring(cadence -> runOnUiThread(() -> {
+            bestCadence = cadence;
+            Toast.makeText(ClinicianActivity.this,
+                    getString(R.string.cadence_measured, bestCadence),
+                    Toast.LENGTH_SHORT).show();
+        }));
 
         Toast.makeText(this, R.string.measuring_cadence, Toast.LENGTH_SHORT).show();
     }
@@ -177,35 +156,40 @@ public class ClinicianActivity extends AppCompatActivity {
     }
 
     private void saveSettings() {
-        // Get the cadence value
         if (rbManualCadence.isChecked()) {
+            String cadenceStr = etManualCadence.getText().toString().trim();
+            if (cadenceStr.isEmpty()) {
+                Toast.makeText(this, R.string.enter_cadence, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             try {
-                bestCadence = Float.parseFloat(etManualCadence.getText().toString());
+                bestCadence = Float.parseFloat(cadenceStr);
             } catch (NumberFormatException e) {
                 Toast.makeText(this, R.string.invalid_cadence, Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Validate cadence
         if (bestCadence <= 0) {
             Toast.makeText(this, R.string.invalid_cadence, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Create or update patient data
         PatientData patientData = new PatientData();
         patientData.setTrainingDuration(trainingDuration);
         patientData.setBestCadence(bestCadence);
 
-        dataManager.savePatientData(patientData);
-
-        Toast.makeText(this, R.string.settings_saved, Toast.LENGTH_SHORT).show();
+        try {
+            dataManager.savePatientData(patientData);
+            Toast.makeText(this, R.string.settings_saved, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.save_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void loadExistingData() {
         PatientData patientData = dataManager.getPatientData();
-
         if (patientData != null) {
             trainingDuration = patientData.getTrainingDuration();
             bestCadence = patientData.getBestCadence();
@@ -220,6 +204,7 @@ public class ClinicianActivity extends AppCompatActivity {
     }
 
     private void logout() {
+        stopSensorMeasurement();
         sessionManager.setLoggedIn(false);
         sessionManager.setUsername("");
         finish();

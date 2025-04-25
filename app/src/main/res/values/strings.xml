@@ -1,4 +1,7 @@
 <resources>
+    <string name="enter_cadence">Please enter a cadence value</string>
+    <string name="save_error">Error saving patient data</string>
+
     <string name="app_name">mSWAY</string>
 
     <!-- General strings -->
