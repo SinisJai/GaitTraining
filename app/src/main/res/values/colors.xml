@@ -1,15 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="primary">#FF5722</color>
-    <color name="primaryDark">#E64A19</color>
-    <color name="primaryLight">#FFCCBC</color>
-    <color name="accent">#03A9F4</color>
-    <color name="colorSuccess">#4CAF50</color>
-    <color name="colorWarning">#FFC107</color>
-    <color name="colorError">#F44336</color>
-    <color name="textPrimary">#212121</color>
-    <color name="textSecondary">#757575</color>
-    <color name="divider">#BDBDBD</color>
+<!-- Red shades -->
+<color name="red">#FF0000</color>
+<color name="dark_red">#8B0000</color>
+<color name="light_red">#FF6666</color>
+<color name="deep_red">#B22222</color>
+<color name="rose_red">#FF007F</color>
+
+<!-- Green shades -->
+<color name="green">#00FF00</color>
+<color name="dark_green">#006400</color>
+<color name="light_green">#90EE90</color>
+<color name="mint_green">#98FF98</color>
+<color name="forest_green">#228B22</color>
+
+<!-- Blue shades -->
+<color name="blue">#0000FF</color>
+<color name="dark_blue">#00008B</color>
+<color name="light_blue">#ADD8E6</color>
+<color name="sky_blue">#87CEEB</color>
+<color name="navy_blue">#000080</color>
+
+<!-- Yellow shades -->
+<color name="yellow">#FFFF00</color>
+<color name="dark_yellow">#FFD700</color>
+<color name="light_yellow">#FFFFE0</color>
+<color name="gold_yellow">#FFC300</color>
+<color name="lemon_yellow">#FFF700</color>
+
+<!-- Orange shades -->
+<color name="orange">#FFA500</color>
+<color name="dark_orange">#FF8C00</color>
+<color name="light_orange">#FFD580</color>
+<color name="burnt_orange">#CC5500</color>
+<color name="peach_orange">#FFE5B4</color>
+
+<!-- Purple shades -->
+<color name="purple">#800080</color>
+<color name="dark_purple">#4B0082</color>
+<color name="lavender">#E6E6FA</color>
+<color name="violet">#EE82EE</color>
+<color name="plum">#DDA0DD</color>
+
+<!-- Brown shades -->
+<color name="brown">#A52A2A</color>
+<color name="dark_brown">#8B4513</color>
+<color name="light_brown">#D2B48C</color>
+<color name="chocolate_brown">#7B3F00</color>
+<color name="sandy_brown">#F4A460</color>
+
+<!-- Pink shades -->
+<color name="pink">#FFC0CB</color>
+<color name="dark_pink">#FF1493</color>
+<color name="light_pink">#FFDDC1</color>
+<color name="hot_pink">#FF69B4</color>
+<color name="pale_pink">#FADADD</color>
+
+<!-- Gray shades -->
+<color name="gray">#808080</color>
+<color name="dark_gray">#505050</color> <!-- Adjusted darker -->
+<color name="light_gray">#D3D3D3</color>
+<color name="silver">#C0C0C0</color>
+<color name="slate_gray">#708090</color>
+
+<!-- Other colors -->
+<color name="cyan">#00FFFF</color>
+<color name="light_cyan">#E0FFFF</color>
+<color name="magenta">#FF00FF</color>
+<color name="beige">#F5F5DC</color>
+<color name="ivory">#FFFFF0</color>
+<color name="black">#000000</color>
+<color name="white">#FFFFFF</color>
 </resources>

@@ -1,8 +1,8 @@
 <resources>
-    <string name="enter_cadence">Please enter a cadence value</string>
-    <string name="save_error">Error saving patient data</string>
+    <string name="enter_cadence">Inserire un valure di cadenza</string>
+    <string name="save_error">Errore nel salvataggio</string>
 
-    <string name="app_name">mSWAY</string>
+    <string name="app_name">Gait Training</string>
 
     <!-- General strings -->
     <string name="back">Indietro</string>
@@ -13,7 +13,7 @@
     <string name="logout">Esci</string>
 
     <!-- Main Activity -->
-    <string name="app_description">Gait training</string>
+    <string name="app_description">Musica per il tuo allenamento</string>
     <string name="patient_mode">Paziente</string>
     <string name="clinician_mode">Clinico</string>
 
