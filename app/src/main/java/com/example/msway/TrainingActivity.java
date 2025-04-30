@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -32,7 +33,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+// Activity principale per la fase di allenamento del paziente
 public class TrainingActivity extends AppCompatActivity {
+    // Componenti UI
     private TextView tvTimer;
     private TextView tvCurrentCadence;
     private TextView tvTargetCadence;
@@ -40,15 +43,18 @@ public class TrainingActivity extends AppCompatActivity {
     private ProgressBar pbTrainingProgress;
     private Button btnStopTraining;
 
+    // Gestione dati, sessione, audio e sensori
     private DataManager dataManager;
     private SessionManager sessionManager;
     private AudioManager audioManager;
     private SensorManager sensorManager;
     private Vibrator vibrator;
 
+    // Dati del paziente e parametri di allenamento
     private PatientData patientData;
     private String selectedMusicGenre;
 
+    // Timer e variabili per gestione della sessione
     private CountDownTimer trainingTimer;
     private boolean isTrainingActive = false;
     private long trainingDurationMs;
@@ -56,6 +62,7 @@ public class TrainingActivity extends AppCompatActivity {
     private float targetCadence;
     private float currentCadence;
 
+    // Gestione del ritmo sonoro
     private Handler rhythmHandler = new Handler();
     private Runnable rhythmRunnable;
     private long rhythmInterval;
@@ -65,18 +72,20 @@ public class TrainingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        EdgeToEdge.enable(this);// Layout edge-to-edge
         setContentView(R.layout.activity_training);
+        // Adatta layout alle barre di sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.mainTrainingLayout), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        initializeComponents();
-        prepareTrainingSession();
+        initializeComponents();      // Inizializza componenti UI e manager
+        prepareTrainingSession();    // Prepara la sessione d’allenamento
     }
 
+    // Inizializza gli elementi grafici e la logica dei pulsanti
     private void initializeComponents() {
         tvTimer = findViewById(R.id.tvTimer);
         tvCurrentCadence = findViewById(R.id.tvCurrentCadence);
@@ -91,6 +100,7 @@ public class TrainingActivity extends AppCompatActivity {
         sensorManager = new SensorManager(this);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
+        // Pulsante per fermare l'allenamento
         btnStopTraining.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,35 +109,38 @@ public class TrainingActivity extends AppCompatActivity {
         });
     }
 
+    // Prepara i dati e parametri per avviare l’allenamento
     private void prepareTrainingSession() {
         patientData = dataManager.getPatientData();
         selectedMusicGenre = dataManager.getSelectedMusicGenre();
 
+        // Controllo validità dei dati
         if (patientData == null || patientData.getBestCadence() <= 0 || patientData.getTrainingDuration() <= 0) {
             Toast.makeText(this, R.string.invalid_training_config, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        // Imposta un genere musicale di default se non specificato
         if (selectedMusicGenre == null || selectedMusicGenre.isEmpty()) {
-            selectedMusicGenre = "Classical"; // Default music genre
+            selectedMusicGenre = "Rock"; // Default music genre
         }
 
-        // Set up training parameters
+        // Imposta i parametri per la sessione
         targetCadence = patientData.getBestCadence();
         trainingDurationMs = TimeUnit.MINUTES.toMillis(patientData.getTrainingDuration());
         remainingTimeMs = trainingDurationMs;
 
-        // Calculate rhythm interval in milliseconds based on cadence
-        // Cadence is steps per minute, so we need to convert to interval between steps
-        rhythmInterval = (long) (60000 / targetCadence);
+        // Calcola intervallo ritmo in ms basato sulla cadenza
+        // Cadenza è passi al minuto, quindi va convertito in intervallo tra passi
+        rhythmInterval = (long)((float) ((float)60000 / targetCadence));
 
-        // Update UI
+        // Aggiorna UI
         tvTargetCadence.setText(getString(R.string.target_cadence_value, targetCadence));
         tvCurrentCadence.setText(getString(R.string.current_cadence_value, 0.0f));
         tvMusicGenre.setText(getString(R.string.music_genre_value, selectedMusicGenre));
 
-        // Initialize training session data
+        // Crea oggetto per la sessione corrente
         currentSession = new TrainingSession();
         currentSession.setStartTime(System.currentTimeMillis());
         currentSession.setTargetCadence(targetCadence);
@@ -135,9 +148,10 @@ public class TrainingActivity extends AppCompatActivity {
         currentSession.setMusicGenre(selectedMusicGenre);
 
         // Show countdown and start training
-        startCountdown();
+        startCountdown(); // Mostra conto alla rovescia prima di iniziare
     }
 
+    // Conto alla rovescia iniziale
     private void startCountdown() {
         new CountDownTimer(3000, 1000) {
             @Override
@@ -150,18 +164,19 @@ public class TrainingActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                startTrainingSession();
+                startTrainingSession();// Inizia sessione effettiva
             }
         }.start();
     }
 
+    // Inizia la sessione di allenamento
     private void startTrainingSession() {
         isTrainingActive = true;
 
-        // Start background music
+        // Avvia musica di sottofondo
         audioManager.playBackgroundMusic(selectedMusicGenre);
 
-        // Start sensor monitoring
+        // Inizia la misurazione della cadenza tramite sensori
         sensorManager.startMeasuring(new SensorManager.OnCadenceMeasuredListener() {
             @Override
             public void onCadenceMeasured(final float cadence) {
@@ -171,25 +186,25 @@ public class TrainingActivity extends AppCompatActivity {
                         currentCadence = cadence;
                         tvCurrentCadence.setText(getString(R.string.current_cadence_value, currentCadence));
 
-                        // Provide feedback based on cadence
+                        // Vibrazione se la cadenza è errata
                         provideCadenceFeedback();
                     }
                 });
             }
         });
 
-        // Start rhythm sounds
-        startRhythmSounds();
-
-        // Start timer
-        startTrainingTimer();
+        startRhythmSounds();     // Avvia suoni ritmici
+        startTrainingTimer();    // Avvia il timer della sessione
     }
 
+    // Avvio dei suoni ritmici periodici
     private void startRhythmSounds() {
         rhythmRunnable = new Runnable() {
             @Override
             public void run() {
+                Log.d("prova ritmo 1","isTrainingActive:"+isTrainingActive);
                 if (isTrainingActive) {
+                    Log.d("prova ritmo 2","sono qui:"+rhythmInterval);
                     audioManager.playRhythmSound();
                     rhythmHandler.postDelayed(this, rhythmInterval);
                 }
@@ -199,17 +214,19 @@ public class TrainingActivity extends AppCompatActivity {
         rhythmHandler.post(rhythmRunnable);
     }
 
+    // Vibrazione se la cadenza è distante dal target
     private void provideCadenceFeedback() {
-        // Calculate the difference between current and target cadence
+        // Calcola la differenza tra cadenza attuale e obbiettivo
         float cadenceDiff = Math.abs(currentCadence - targetCadence);
         float percentDiff = (cadenceDiff / targetCadence) * 100;
 
-        // Provide haptic feedback if cadence is too far from target
+        // Fornisce feedback se cadenza è troppo distante da obbiettivo
         if (percentDiff > 15 && vibrator != null && vibrator.hasVibrator()) {
-            vibrator.vibrate(200);
+            vibrator.vibrate(200);// Vibrazione di 200ms
         }
     }
 
+    // Avvia il conto alla rovescia dell’allenamento
     private void startTrainingTimer() {
         pbTrainingProgress.setMax(100);
 
@@ -218,7 +235,7 @@ public class TrainingActivity extends AppCompatActivity {
             public void onTick(long millisUntilFinished) {
                 remainingTimeMs = millisUntilFinished;
 
-                // Update timer display
+                // Aggiorna timer visivo
                 String timeDisplay = String.format(
                         Locale.getDefault(),
                         "%02d:%02d",
@@ -227,7 +244,7 @@ public class TrainingActivity extends AppCompatActivity {
                 );
                 tvTimer.setText(timeDisplay);
 
-                // Update progress bar
+                // Aggiorna barra di progresso
                 int progress = (int) (((trainingDurationMs - millisUntilFinished) * 100) / trainingDurationMs);
                 pbTrainingProgress.setProgress(progress);
             }
@@ -236,25 +253,26 @@ public class TrainingActivity extends AppCompatActivity {
             public void onFinish() {
                 tvTimer.setText("00:00");
                 pbTrainingProgress.setProgress(100);
-                completeTrainingSession();
+                completeTrainingSession();// Fine sessione
             }
         };
 
         trainingTimer.start();
     }
 
+    // Completa e salva la sessione di allenamento
     private void completeTrainingSession() {
         isTrainingActive = false;
 
-        // Stop all ongoing processes
+        // Ferma tutti i processi in atto
         stopTrainingProcesses();
 
-        // Save training session data
+        // Salva i dati
         currentSession.setEndTime(System.currentTimeMillis());
         currentSession.setAverageCadence(currentCadence);
         dataManager.saveTrainingSession(currentSession);
 
-        // Show completion dialog
+        // Mostra dialog di completamento
         new AlertDialog.Builder(this)
                 .setTitle(R.string.training_complete)
                 .setMessage(R.string.training_complete_message)
@@ -263,14 +281,15 @@ public class TrainingActivity extends AppCompatActivity {
                 .show();
     }
 
+    // Ferma sessione manualmente
     private void stopTrainingSession() {
         if (isTrainingActive) {
             isTrainingActive = false;
 
-            // Stop all ongoing processes
+            // Ferma tutti i processi in atto
             stopTrainingProcesses();
 
-            // Save partial training session data
+            // Salva dati parziali
             currentSession.setEndTime(System.currentTimeMillis());
             currentSession.setAverageCadence(currentCadence);
             currentSession.setCompleted(false);
@@ -280,22 +299,24 @@ public class TrainingActivity extends AppCompatActivity {
         }
     }
 
+    // Ferma timer, audio, sensori, ritmo
     private void stopTrainingProcesses() {
         // Stop timer
         if (trainingTimer != null) {
             trainingTimer.cancel();
         }
 
-        // Stop rhythm sounds
+        // Ferma suoni ritmici
         rhythmHandler.removeCallbacks(rhythmRunnable);
 
-        // Stop sensor monitoring
+        // Ferma il monitoraggio con sensori
         sensorManager.stopMeasuring();
 
-        // Stop background music
+        // Ferma musica di sottofondo
         audioManager.stopBackgroundMusic();
     }
 
+    // Mostra conferma per fermare sessione
     private void showStopTrainingConfirmation() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.stop_training)
@@ -308,7 +329,7 @@ public class TrainingActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (isTrainingActive) {
-            showStopTrainingConfirmation();
+            showStopTrainingConfirmation();// Blocca back se sessione attiva
         } else {
             super.onBackPressed();
         }
@@ -317,6 +338,6 @@ public class TrainingActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopTrainingProcesses();
+        stopTrainingProcesses();// Ferma tutto se activity viene chiusa
     }
 }

@@ -21,7 +21,9 @@ import com.example.msway.utils.DataManager;
 import com.example.msway.utils.SensorManager;
 import com.example.msway.utils.SessionManager;
 
+// Classe principale dell'attività per il clinico, permette di configurare durata e cadenza dell’allenamento
 public class ClinicianActivity extends AppCompatActivity {
+    // Dichiarazione dei componenti UI
     private TextView tvTrainingDuration;
     private SeekBar sbTrainingDuration;
     private RadioGroup rgCadenceMethod;
@@ -32,30 +34,36 @@ public class ClinicianActivity extends AppCompatActivity {
     private Button btnSave;
     private Button btnLogout;
 
+    // Manager per i dati, sessioni e sensori
     private DataManager dataManager;
     private SessionManager sessionManager;
     private SensorManager sensorManager;
 
-    private int trainingDuration = 5; // Default 5 minutes
+    // Variabili di stato
+    private int trainingDuration = 30; // Default 30 minuti
     private float bestCadence = 0;
     private boolean isMeasuringSensors = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        EdgeToEdge.enable(this);// Abilita layout edge-to-edge
         setContentView(R.layout.activity_clinician);
+
+        // Gestione dei margini per evitare sovrapposizioni con barre di sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.mainClinicianLayout), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        initializeComponents();
-        loadExistingData();
+        initializeComponents();// Inizializza la UI e i manager
+        loadExistingData(); // Carica i dati precedentemente salvati
     }
 
+    // Metodo per inizializzare componenti UI e logica
     private void initializeComponents() {
+        // Collega i componenti della UI
         tvTrainingDuration = findViewById(R.id.tvTrainingDuration);
         sbTrainingDuration = findViewById(R.id.sbTrainingDuration);
         rgCadenceMethod = findViewById(R.id.rgCadenceMethod);
@@ -66,26 +74,29 @@ public class ClinicianActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSave);
         btnLogout = findViewById(R.id.btnLogout);
 
+        // Inizializza i manager
         dataManager = new DataManager(getApplicationContext());
         sessionManager = new SessionManager(getApplicationContext());
         sensorManager = new SensorManager(this);
 
+        // Setup delle funzionalità
         setupTrainingDurationControls();
         setupCadenceControls();
         setupButtons();
     }
 
+    // Gestione della SeekBar per la durata dell'allenamento
     private void setupTrainingDurationControls() {
         sbTrainingDuration.setMin(1);
         sbTrainingDuration.setMax(30);
         sbTrainingDuration.setProgress(trainingDuration);
-        updateTrainingDurationText();
+        updateTrainingDurationText();//Aggiorna il testo visibile
 
         sbTrainingDuration.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 trainingDuration = progress;
-                updateTrainingDurationText();
+                updateTrainingDurationText();//Mostra nuovo valore
             }
 
             @Override
@@ -96,38 +107,42 @@ public class ClinicianActivity extends AppCompatActivity {
         });
     }
 
+    // Logica per il metodo di cadenza scelto: manuale o tramite sensore
     private void setupCadenceControls() {
         rgCadenceMethod.setOnCheckedChangeListener((group, checkedId) -> updateCadenceMethod());
         updateCadenceMethod();
     }
 
+    // Imposta gli eventi click per i pulsanti
     private void setupButtons() {
         btnMeasureCadence.setOnClickListener(v -> {
             if (!isMeasuringSensors) {
-                startSensorMeasurement();
+                startSensorMeasurement(); // Avvia misurazione
             } else {
-                stopSensorMeasurement();
+                stopSensorMeasurement(); // Ferma misurazione
             }
         });
 
-        btnSave.setOnClickListener(v -> saveSettings());
-        btnLogout.setOnClickListener(v -> logout());
+        btnSave.setOnClickListener(v -> saveSettings()); // Salva configurazione
+        btnLogout.setOnClickListener(v -> logout()); //Effettua logout
     }
 
     private void updateTrainingDurationText() {
         tvTrainingDuration.setText(getString(R.string.training_duration_minutes, trainingDuration));
     }
 
+    // Abilita/disabilita campi in base al metodo di cadenza scelto
     private void updateCadenceMethod() {
         boolean isManual = rbManualCadence.isChecked();
         etManualCadence.setEnabled(isManual);
         btnMeasureCadence.setEnabled(!isManual);
 
         if (isManual) {
-            stopSensorMeasurement();
+            stopSensorMeasurement(); // Ferma i sensori se si passa al manuale
         }
     }
 
+    // Avvia la misurazione della cadenza tramite sensori
     private void startSensorMeasurement() {
         if (!sensorManager.checkSensorsAvailable()) {
             Toast.makeText(this, R.string.sensors_not_available, Toast.LENGTH_SHORT).show();
@@ -147,6 +162,7 @@ public class ClinicianActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.measuring_cadence, Toast.LENGTH_SHORT).show();
     }
 
+    // Ferma la misurazione dei sensori
     private void stopSensorMeasurement() {
         if (isMeasuringSensors) {
             sensorManager.stopMeasuring();
@@ -155,6 +171,7 @@ public class ClinicianActivity extends AppCompatActivity {
         }
     }
 
+    // Salva la configurazione impostata dal clinico
     private void saveSettings() {
         if (rbManualCadence.isChecked()) {
             String cadenceStr = etManualCadence.getText().toString().trim();
@@ -176,6 +193,7 @@ public class ClinicianActivity extends AppCompatActivity {
             return;
         }
 
+        // Crea oggetto con i dati del paziente e salva
         PatientData patientData = new PatientData();
         patientData.setTrainingDuration(trainingDuration);
         patientData.setBestCadence(bestCadence);
@@ -188,6 +206,7 @@ public class ClinicianActivity extends AppCompatActivity {
         }
     }
 
+    // Carica eventuali dati salvati in precedenza
     private void loadExistingData() {
         PatientData patientData = dataManager.getPatientData();
         if (patientData != null) {
@@ -203,6 +222,7 @@ public class ClinicianActivity extends AppCompatActivity {
         }
     }
 
+    // Metodo di logout: azzera sessione e chiude l’attività
     private void logout() {
         stopSensorMeasurement();
         sessionManager.setLoggedIn(false);
@@ -210,6 +230,7 @@ public class ClinicianActivity extends AppCompatActivity {
         finish();
     }
 
+    // Ferma eventuali sensori alla distruzione dell’attività
     @Override
     protected void onDestroy() {
         super.onDestroy();

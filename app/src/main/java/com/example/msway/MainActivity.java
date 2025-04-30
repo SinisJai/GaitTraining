@@ -2,6 +2,7 @@ package com.example.msway;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -16,17 +17,36 @@ import com.example.msway.utils.SessionManager;
 
 import java.io.File;
 
+/*
+ * MainActivity.java
+ * Questa è l'activity di ingresso dell'applicazione mSWAY.
+ * Fornisce una schermata iniziale con due opzioni: modalità Paziente e modalità Clinico.
+ */
+
 public class MainActivity extends AppCompatActivity {
-    private Button btnPatient;
-    private Button btnClinician;
+    /*
+     * MainActivity estende AppCompatActivity per fornire compatibilità con le moderne versioni Android
+     * e accesso alle funzionalità più recenti attraverso la support library.
+     */
+
+    // Componenti dell'UI
+    private Button btnPatient; // Pulsante per accedere alla modalità paziente
+    private Button btnClinician; // Pulsante per accedere alla modalità clinico
+
+    // Manager per i dati e per i sensori
     private SessionManager sessionManager;
     private DataManager dataManager;
 
+    /*
+     * onCreate: Metodo del ciclo di vita dell’Activity chiamato alla sua creazione
+     * Inizializza l'interfaccia utente e imposta lo stato iniziale dell'applicazione
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        EdgeToEdge.enable(this);// Abilita il supporto alla visualizzazione edge-to-edge
+        setContentView(R.layout.activity_main); // Imposta il layout dell’interfaccia principale
+        // Gestione dei margini
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -38,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Create data directories if they don't exist
         setupDataDirectories();
+
+        Log.d("prova 1","sono qui");
     }
 
     private void initializeComponents() {

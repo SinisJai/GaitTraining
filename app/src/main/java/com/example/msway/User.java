@@ -3,23 +3,27 @@ package com.example.msway;
 
 import java.io.Serializable;
 
+// Classe modello per rappresentare un utente dell’applicazione
 public class User implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L; // Per serializzazione sicura
 
+    // Campi principali dell’utente
     private String username;
     private String name;
     private String role;
 
     public User() {
-        // Default constructor required for serialization
+        // Costruttore vuoto richiesto per serializzazione/deserializzazione
     }
 
+    // Costruttore completo
     public User(String username, String name, String role) {
         this.username = username;
         this.name = name;
         this.role = role;
     }
 
+    // Metodi getter e setter
     public String getUsername() {
         return username;
     }
@@ -44,6 +48,7 @@ public class User implements Serializable {
         this.role = role;
     }
 
+    // Override per rappresentare l’oggetto in formato leggibile
     @Override
     public String toString() {
         return "User{" +
