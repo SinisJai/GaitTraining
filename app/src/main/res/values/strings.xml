@@ -1,8 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="enter_cadence">Inserire un valure di cadenza</string>
     <string name="save_error">Errore nel salvataggio</string>
 
     <string name="app_name">Gait Training</string>
+    <string name="patient_code">Patient Code</string>
+    <string name="enter_patient_code">Enter patient code</string>
+    <string name="invalid_patient_code">Please enter a valid patient code</string>
 
     <!-- General strings -->
     <string name="back">Indietro</string>

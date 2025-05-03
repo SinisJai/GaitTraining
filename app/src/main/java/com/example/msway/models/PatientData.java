@@ -5,11 +5,20 @@ import java.io.Serializable;
 public class PatientData implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    private String patientCode;
     private int trainingDuration = 5; // Default 5 minutes
     private float bestCadence = 0;
 
     public PatientData() {
         // Default constructor required for serialization
+    }
+
+    public String getPatientCode() {
+        return patientCode;
+    }
+
+    public void setPatientCode(String patientCode) {
+        this.patientCode = patientCode;
     }
 
     public int getTrainingDuration() {
@@ -31,7 +40,8 @@ public class PatientData implements Serializable {
     @Override
     public String toString() {
         return "PatientData{" +
-                "trainingDuration=" + trainingDuration +
+                "patientCode='" + patientCode + '\'' +
+                ", trainingDuration=" + trainingDuration +
                 ", bestCadence=" + bestCadence +
                 '}';
     }

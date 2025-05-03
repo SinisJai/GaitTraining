@@ -1,6 +1,5 @@
 package com.example.msway.utils;
 
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -8,72 +7,89 @@ import android.util.Log;
 import com.example.msway.models.PatientData;
 import com.example.msway.models.TrainingSession;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Manages persistent storage for patient data, training sessions, and preferences.
+ */
 public class DataManager {
     private static final String TAG = "DataManager";
     private static final String PREFS_NAME = "MSWAYPrefs";
     private static final String PREF_MUSIC_GENRE = "selected_music_genre";
 
-    private Context context;
-    private SharedPreferences preferences;
+    private final Context context;
+    private final SharedPreferences preferences;
 
     public DataManager(Context context) {
         this.context = context;
         this.preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
+    // ========= PATIENT DATA (JSON) =========
+
     public void savePatientData(PatientData patientData) {
         try {
             File dataDir = new File(context.getFilesDir(), "mSWAY_data");
-            if (!dataDir.exists()) {
-                dataDir.mkdir();
-            }
+            if (!dataDir.exists()) dataDir.mkdir();
 
-            File patientDataFile = new File(dataDir, "patient_data.dat");
-            FileOutputStream fos = new FileOutputStream(patientDataFile);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(patientData);
-            oos.close();
-            fos.close();
+            File patientsDir = new File(dataDir, "patients");
+            if (!patientsDir.exists()) patientsDir.mkdir();
 
-            Log.d(TAG, "Patient data saved successfully");
-        } catch (IOException e) {
-            Log.e(TAG, "Error saving patient data: " + e.getMessage());
+            File patientDataFile = new File(patientsDir, patientData.getPatientCode() + ".json");
+
+            JSONObject json = new JSONObject();
+            json.put("patientCode", patientData.getPatientCode());
+            json.put("trainingDuration", patientData.getTrainingDuration());
+            json.put("bestCadence", patientData.getBestCadence());
+
+            FileWriter writer = new FileWriter(patientDataFile);
+            writer.write(json.toString());
+            writer.flush();
+            writer.close();
+
+            Log.d(TAG, "Patient data saved as JSON: " + patientData.getPatientCode());
+        } catch (IOException | JSONException e) {
+            Log.e(TAG, "Error saving patient data", e);
         }
     }
 
-    public PatientData getPatientData() {
+    public PatientData getPatientData(String patientCode) {
         try {
-            File dataDir = new File(context.getFilesDir(), "mSWAY_data");
-            File patientDataFile = new File(dataDir, "patient_data.dat");
+            File dataDir = new File(context.getFilesDir(), "mSWAY_data/patients");
+            File patientFile = new File(dataDir, patientCode + ".json");
 
-            if (!patientDataFile.exists()) {
-                return null;
+            if (!patientFile.exists()) return null;
+
+            BufferedReader reader = new BufferedReader(new FileReader(patientFile));
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuilder.append(line);
             }
+            reader.close();
 
-            FileInputStream fis = new FileInputStream(patientDataFile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            PatientData patientData = (PatientData) ois.readObject();
-            ois.close();
-            fis.close();
+            JSONObject json = new JSONObject(jsonBuilder.toString());
+            PatientData patientData = new PatientData();
+            patientData.setPatientCode(json.getString("patientCode"));
+            patientData.setTrainingDuration(json.getInt("trainingDuration"));
+            patientData.setBestCadence((float) json.getDouble("bestCadence"));
 
             return patientData;
-        } catch (IOException | ClassNotFoundException e) {
-            Log.e(TAG, "Error loading patient data: " + e.getMessage());
+        } catch (IOException | JSONException e) {
+            Log.e(TAG, "Error loading patient data", e);
             return null;
         }
     }
+
+    // ========= TRAINING SESSION DATA =========
 
     public void saveTrainingSession(TrainingSession session) {
         try {
@@ -82,18 +98,15 @@ public class DataManager {
             File rawDataDir = new File(subjectsDir, "raw_data");
             File processedDataDir = new File(subjectsDir, "processed_data");
 
-            // Create directories if they don't exist
             if (!dataDir.exists()) dataDir.mkdir();
             if (!subjectsDir.exists()) subjectsDir.mkdir();
             if (!rawDataDir.exists()) rawDataDir.mkdir();
             if (!processedDataDir.exists()) processedDataDir.mkdir();
 
-            // Generate filename with timestamp
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
             String timestamp = sdf.format(new Date());
             String filename = "session_" + timestamp + ".dat";
 
-            // Save raw session data
             File rawSessionFile = new File(rawDataDir, filename);
             FileOutputStream fosRaw = new FileOutputStream(rawSessionFile);
             ObjectOutputStream oosRaw = new ObjectOutputStream(fosRaw);
@@ -101,7 +114,6 @@ public class DataManager {
             oosRaw.close();
             fosRaw.close();
 
-            // Save a summary in processed data
             File processedSessionFile = new File(processedDataDir, filename + ".summary");
             FileOutputStream fosProcessed = new FileOutputStream(processedSessionFile);
             StringBuilder summary = new StringBuilder();
@@ -125,18 +137,14 @@ public class DataManager {
         List<TrainingSession> sessions = new ArrayList<>();
 
         try {
-            File dataDir = new File(context.getFilesDir(), "mSWAY_data");
-            File subjectsDir = new File(dataDir, "subjects");
-            File rawDataDir = new File(subjectsDir, "raw_data");
+            File rawDataDir = new File(context.getFilesDir(), "mSWAY_data/subjects/raw_data");
 
-            if (!rawDataDir.exists()) {
-                return sessions;
-            }
+            if (!rawDataDir.exists()) return sessions;
 
             File[] files = rawDataDir.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isFile() && file.getName().startsWith("session_")) {
+                    if (file.getName().endsWith(".dat")) {
                         FileInputStream fis = new FileInputStream(file);
                         ObjectInputStream ois = new ObjectInputStream(fis);
                         TrainingSession session = (TrainingSession) ois.readObject();
@@ -153,6 +161,8 @@ public class DataManager {
         return sessions;
     }
 
+    // ========= PREFERENCES: MUSIC GENRE =========
+
     public void saveSelectedMusicGenre(String genre) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(PREF_MUSIC_GENRE, genre);
@@ -160,6 +170,6 @@ public class DataManager {
     }
 
     public String getSelectedMusicGenre() {
-        return preferences.getString(PREF_MUSIC_GENRE, "");
+        return preferences.getString(PREF_MUSIC_GENRE, null);
     }
 }

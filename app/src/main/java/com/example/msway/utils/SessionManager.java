@@ -3,42 +3,38 @@ package com.example.msway.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 public class SessionManager {
-    private static final String PREF_NAME = "MSWAYSession";
-    private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
+    private SharedPreferences sharedPreferences;
+    private static final String PREF_NAME = "mSWAYSession";
     private static final String KEY_USERNAME = "username";
-
-    private SharedPreferences preferences;
-    private SharedPreferences.Editor editor;
-    private Context context;
+    private static final String KEY_LOGGED_IN = "logged_in";
+    private static final String PREF_ACTIVE_PATIENT = "active_patient";
 
     public SessionManager(Context context) {
-        this.context = context;
-        preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        editor = preferences.edit();
-    }
-
-    public void setLoggedIn(boolean isLoggedIn) {
-        editor.putBoolean(KEY_IS_LOGGED_IN, isLoggedIn);
-        editor.apply();
-    }
-
-    public boolean isLoggedIn() {
-        return preferences.getBoolean(KEY_IS_LOGGED_IN, false);
+        sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
     public void setUsername(String username) {
-        editor.putString(KEY_USERNAME, username);
-        editor.apply();
+        sharedPreferences.edit().putString(KEY_USERNAME, username).apply();
     }
 
     public String getUsername() {
-        return preferences.getString(KEY_USERNAME, "");
+        return sharedPreferences.getString(KEY_USERNAME, "");
     }
 
-    public void clearSession() {
-        editor.clear();
-        editor.apply();
+    public void setLoggedIn(boolean loggedIn) {
+        sharedPreferences.edit().putBoolean(KEY_LOGGED_IN, loggedIn).apply();
+    }
+
+    public boolean isLoggedIn() {
+        return sharedPreferences.getBoolean(KEY_LOGGED_IN, false);
+    }
+
+    public void setActivePatientCode(String code) {
+        sharedPreferences.edit().putString(PREF_ACTIVE_PATIENT, code).apply();
+    }
+
+    public String getActivePatientCode() {
+        return sharedPreferences.getString(PREF_ACTIVE_PATIENT, null);
     }
 }

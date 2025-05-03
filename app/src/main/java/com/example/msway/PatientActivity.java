@@ -18,19 +18,23 @@ import com.example.msway.utils.DataManager;
 import com.example.msway.utils.SessionManager;
 
 public class PatientActivity extends AppCompatActivity {
+
     private Button btnStartTraining;
     private Button btnSelectMusic;
     private Button btnBack;
     private TextView tvTrainingDuration;
     private TextView tvBestCadence;
+
     private DataManager dataManager;
     private SessionManager sessionManager;
+    private PatientData patientData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_patient);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.mainPatientLayout), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -56,34 +60,24 @@ public class PatientActivity extends AppCompatActivity {
         dataManager = new DataManager(getApplicationContext());
         sessionManager = new SessionManager(getApplicationContext());
 
-        btnStartTraining.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startTrainingSession();
-            }
+        btnStartTraining.setOnClickListener(v -> startTrainingSession());
+
+        btnSelectMusic.setOnClickListener(v -> {
+            Intent intent = new Intent(PatientActivity.this, MusicSelectionActivity.class);
+            startActivity(intent);
         });
 
-        btnSelectMusic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(PatientActivity.this, MusicSelectionActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
-        updateUIWithPatientData();
+        btnBack.setOnClickListener(v -> finish());
     }
 
     private void updateUIWithPatientData() {
-        PatientData patientData = dataManager.getPatientData();
+        String patientCode = sessionManager.getActivePatientCode();
+        if (patientCode == null) {
+            Toast.makeText(this, "No active patient assigned. Clinician setup required.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
+        patientData = dataManager.getPatientData(patientCode);
         if (patientData != null) {
             tvTrainingDuration.setText(getString(R.string.training_duration_value, patientData.getTrainingDuration()));
 
@@ -98,19 +92,16 @@ public class PatientActivity extends AppCompatActivity {
             tvTrainingDuration.setText(R.string.no_training_duration_set);
             tvBestCadence.setText(R.string.no_cadence_recorded);
             btnStartTraining.setEnabled(false);
-
-            Toast.makeText(this, R.string.setup_required, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Patient data not found for code: " + patientCode, Toast.LENGTH_LONG).show();
         }
     }
 
     private void startTrainingSession() {
-        PatientData patientData = dataManager.getPatientData();
-
         if (patientData != null && patientData.getBestCadence() > 0 && patientData.getTrainingDuration() > 0) {
             Intent intent = new Intent(PatientActivity.this, TrainingActivity.class);
             startActivity(intent);
         } else {
-            Toast.makeText(this, R.string.setup_required, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Setup incomplete. Please contact clinician.", Toast.LENGTH_SHORT).show();
         }
     }
 }

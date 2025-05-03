@@ -33,6 +33,7 @@ public class ClinicianActivity extends AppCompatActivity {
     private Button btnMeasureCadence;
     private Button btnSave;
     private Button btnLogout;
+    private EditText etPatientCode; // Added patient code field
 
     // Manager per i dati, sessioni e sensori
     private DataManager dataManager;
@@ -73,6 +74,7 @@ public class ClinicianActivity extends AppCompatActivity {
         btnMeasureCadence = findViewById(R.id.btnMeasureCadence);
         btnSave = findViewById(R.id.btnSave);
         btnLogout = findViewById(R.id.btnLogout);
+        etPatientCode = findViewById(R.id.etPatientCode); // Added patient code field initialization
 
         // Inizializza i manager
         dataManager = new DataManager(getApplicationContext());
@@ -173,6 +175,11 @@ public class ClinicianActivity extends AppCompatActivity {
 
     // Salva la configurazione impostata dal clinico
     private void saveSettings() {
+        String patientCode = etPatientCode.getText().toString().trim();
+        if (patientCode.isEmpty()) {
+            Toast.makeText(this, R.string.enter_patient_code, Toast.LENGTH_SHORT).show(); // Added error message
+            return;
+        }
         if (rbManualCadence.isChecked()) {
             String cadenceStr = etManualCadence.getText().toString().trim();
             if (cadenceStr.isEmpty()) {
@@ -194,29 +201,30 @@ public class ClinicianActivity extends AppCompatActivity {
         }
 
         // Crea oggetto con i dati del paziente e salva
-        PatientData patientData = new PatientData();
-        patientData.setTrainingDuration(trainingDuration);
-        patientData.setBestCadence(bestCadence);
+        PatientData data = new PatientData();
+        data.setPatientCode(patientCode);
+        data.setTrainingDuration(trainingDuration);
+        data.setBestCadence(bestCadence);
 
-        try {
-            dataManager.savePatientData(patientData);
-            Toast.makeText(this, R.string.settings_saved, Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(this, R.string.save_error, Toast.LENGTH_SHORT).show();
-        }
+        dataManager.savePatientData(data);
+        sessionManager.setActivePatientCode(patientCode);
+
+        Toast.makeText(this, "Settings saved for " + patientCode, Toast.LENGTH_SHORT).show();
     }
+
 
     // Carica eventuali dati salvati in precedenza
     private void loadExistingData() {
-        PatientData patientData = dataManager.getPatientData();
-        if (patientData != null) {
-            trainingDuration = patientData.getTrainingDuration();
-            bestCadence = patientData.getBestCadence();
+        String patientCode = sessionManager.getActivePatientCode();
+        if (patientCode != null) {
+            PatientData data = dataManager.getPatientData(patientCode);
+            if (data != null) {
+                trainingDuration = data.getTrainingDuration();
+                bestCadence = data.getBestCadence();
+                etPatientCode.setText(data.getPatientCode());
 
-            sbTrainingDuration.setProgress(trainingDuration);
-            updateTrainingDurationText();
-
-            if (bestCadence > 0) {
+                sbTrainingDuration.setProgress(trainingDuration);
+                updateTrainingDurationText();
                 etManualCadence.setText(String.valueOf(bestCadence));
             }
         }

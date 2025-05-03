@@ -111,7 +111,8 @@ public class TrainingActivity extends AppCompatActivity {
 
     // Prepara i dati e parametri per avviare l’allenamento
     private void prepareTrainingSession() {
-        patientData = dataManager.getPatientData();
+        String patientCode = sessionManager.getActivePatientCode();
+        patientData = dataManager.getPatientData(patientCode);
         selectedMusicGenre = dataManager.getSelectedMusicGenre();
 
         // Controllo validità dei dati
@@ -177,21 +178,11 @@ public class TrainingActivity extends AppCompatActivity {
         audioManager.playBackgroundMusic(selectedMusicGenre);
 
         // Inizia la misurazione della cadenza tramite sensori
-        sensorManager.startMeasuring(new SensorManager.OnCadenceMeasuredListener() {
-            @Override
-            public void onCadenceMeasured(final float cadence) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        currentCadence = cadence;
-                        tvCurrentCadence.setText(getString(R.string.current_cadence_value, currentCadence));
-
-                        // Vibrazione se la cadenza è errata
-                        provideCadenceFeedback();
-                    }
-                });
-            }
-        });
+        sensorManager.startMeasuring(cadence -> runOnUiThread(() -> {
+            currentCadence = cadence;
+            tvCurrentCadence.setText(getString(R.string.current_cadence_value, currentCadence));
+            provideCadenceFeedback(); //vibrazione se la cadenza è errata
+        }));
 
         startRhythmSounds();     // Avvia suoni ritmici
         startTrainingTimer();    // Avvia il timer della sessione
@@ -270,6 +261,7 @@ public class TrainingActivity extends AppCompatActivity {
         // Salva i dati
         currentSession.setEndTime(System.currentTimeMillis());
         currentSession.setAverageCadence(currentCadence);
+        currentSession.setCompleted(true);
         dataManager.saveTrainingSession(currentSession);
 
         // Mostra dialog di completamento
