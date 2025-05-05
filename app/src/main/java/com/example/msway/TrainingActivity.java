@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import android.content.SharedPreferences;
+
 
 import com.example.msway.models.PatientData;
 import com.example.msway.models.TrainingSession;
@@ -190,13 +192,24 @@ public class TrainingActivity extends AppCompatActivity {
 
     // Avvio dei suoni ritmici periodici
     private void startRhythmSounds() {
+        SharedPreferences prefs = getSharedPreferences("mSWAYPrefs", MODE_PRIVATE);
+        String rhythmName = prefs.getString("selected_rhythm", "clap_downbeat"); // 🆕 default
+        float rhythmVolume = prefs.getFloat("rhythm_volume", 1.0f); // 🆕 0.0 to 1.0
+
+        int resId = getResources().getIdentifier(rhythmName, "raw", getPackageName());
+
         rhythmRunnable = new Runnable() {
             @Override
             public void run() {
                 Log.d("prova ritmo 1","isTrainingActive:"+isTrainingActive);
                 if (isTrainingActive) {
                     Log.d("prova ritmo 2","sono qui:"+rhythmInterval);
-                    audioManager.playRhythmSound();
+                    MediaPlayer rhythmPlayer = MediaPlayer.create(TrainingActivity.this, resId);
+                    if (rhythmPlayer != null) {
+                        rhythmPlayer.setVolume(rhythmVolume, rhythmVolume); // 🆕 Apply volume
+                        rhythmPlayer.setOnCompletionListener(MediaPlayer::release);
+                        rhythmPlayer.start();
+                    }
                     rhythmHandler.postDelayed(this, rhythmInterval);
                 }
             }

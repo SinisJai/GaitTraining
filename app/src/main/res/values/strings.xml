@@ -4,9 +4,9 @@
     <string name="save_error">Errore nel salvataggio</string>
 
     <string name="app_name">Gait Training</string>
-    <string name="patient_code">Patient Code</string>
-    <string name="enter_patient_code">Enter patient code</string>
-    <string name="invalid_patient_code">Please enter a valid patient code</string>
+    <string name="patient_code">Codice Paziente</string>
+    <string name="enter_patient_code">Inserisci codice paziente</string>
+    <string name="invalid_patient_code">Inserire un codice paziente valido</string>
 
     <!-- General strings -->
     <string name="back">Indietro</string>
@@ -26,7 +26,7 @@
     <string name="login_description">Inserisci le credenziali per accedere</string>
     <string name="username">Nome Utente</string>
     <string name="password">Password</string>
-    <string name="login">Login</string>
+    <string name="login">Accedi</string>
     <string name="empty_fields_error">Nome utente e password non possono essere vuoti</string>
     <string name="invalid_credentials">Credenziali non valide</string>
 

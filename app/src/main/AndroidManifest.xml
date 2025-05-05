@@ -22,28 +22,7 @@
             android:name=".RhythmSelectionActivity"
             android:exported="false" />
         <activity
-            android:name=".User"
-            android:exported="false" />
-        <activity
-            android:name=".models.TrainingSession"
-            android:exported="false" />
-        <activity
-            android:name=".models.PatientData"
-            android:exported="false" />
-        <activity
-            android:name=".utils.SessionManager"
-            android:exported="false" />
-        <activity
-            android:name=".utils.SensorManager"
-            android:exported="false" />
-        <activity
-            android:name=".utils.SecurityManager"
-            android:exported="false" />
-        <activity
-            android:name=".utils.DataManager"
-            android:exported="false" />
-        <activity
-            android:name=".utils.AudioManager"
+            android:name=".models.User"
             android:exported="false" />
         <activity
             android:name=".TrainingActivity"

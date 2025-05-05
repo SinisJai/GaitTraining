@@ -2,13 +2,7 @@ package com.example.msway;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,9 +11,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.msway.models.PatientData;
+import com.example.msway.models.User;
 import com.example.msway.utils.DataManager;
 import com.example.msway.utils.SensorManager;
 import com.example.msway.utils.SessionManager;
+
 
 // Classe principale dell'attività per il clinico, permette di configurare durata e cadenza dell’allenamento
 public class ClinicianActivity extends AppCompatActivity {
@@ -33,7 +29,7 @@ public class ClinicianActivity extends AppCompatActivity {
     private Button btnMeasureCadence;
     private Button btnSave;
     private Button btnLogout;
-    private EditText etPatientCode; // Added patient code field
+    private EditText etPatientCode;
 
     // Manager per i dati, sessioni e sensori
     private DataManager dataManager;
@@ -44,6 +40,7 @@ public class ClinicianActivity extends AppCompatActivity {
     private int trainingDuration = 30; // Default 30 minuti
     private float bestCadence = 0;
     private boolean isMeasuringSensors = false;
+    private User loggedInClinician;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,75 +55,65 @@ public class ClinicianActivity extends AppCompatActivity {
             return insets;
         });
 
-        initializeComponents();// Inizializza la UI e i manager
-        loadExistingData(); // Carica i dati precedentemente salvati
+        dataManager = new DataManager(getApplicationContext());
+        sessionManager = new SessionManager(getApplicationContext());
+        sensorManager = new SensorManager(this);
+        loggedInClinician = sessionManager.getLoggedInUser();
+
+        initializeViews();
+        setupListeners();
+        loadExistingData();
     }
 
     // Metodo per inizializzare componenti UI e logica
-    private void initializeComponents() {
-        // Collega i componenti della UI
+    private void initializeViews() {
         tvTrainingDuration = findViewById(R.id.tvTrainingDuration);
         sbTrainingDuration = findViewById(R.id.sbTrainingDuration);
         rgCadenceMethod = findViewById(R.id.rgCadenceMethod);
         rbManualCadence = findViewById(R.id.rbManualCadence);
         rbSensorCadence = findViewById(R.id.rbSensorCadence);
         etManualCadence = findViewById(R.id.etManualCadence);
+        etPatientCode = findViewById(R.id.etPatientCode);
         btnMeasureCadence = findViewById(R.id.btnMeasureCadence);
         btnSave = findViewById(R.id.btnSave);
         btnLogout = findViewById(R.id.btnLogout);
-        etPatientCode = findViewById(R.id.etPatientCode); // Added patient code field initialization
 
-        // Inizializza i manager
-        dataManager = new DataManager(getApplicationContext());
-        sessionManager = new SessionManager(getApplicationContext());
-        sensorManager = new SensorManager(this);
-
-        // Setup delle funzionalità
-        setupTrainingDurationControls();
-        setupCadenceControls();
-        setupButtons();
-    }
-
-    // Gestione della SeekBar per la durata dell'allenamento
-    private void setupTrainingDurationControls() {
         sbTrainingDuration.setMin(1);
         sbTrainingDuration.setMax(30);
         sbTrainingDuration.setProgress(trainingDuration);
-        updateTrainingDurationText();//Aggiorna il testo visibile
+        updateTrainingDurationText();
+    }
 
+    private void setupListeners() {
         sbTrainingDuration.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 trainingDuration = progress;
-                updateTrainingDurationText();//Mostra nuovo valore
+                updateTrainingDurationText();
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-    }
 
-    // Logica per il metodo di cadenza scelto: manuale o tramite sensore
-    private void setupCadenceControls() {
         rgCadenceMethod.setOnCheckedChangeListener((group, checkedId) -> updateCadenceMethod());
-        updateCadenceMethod();
-    }
 
-    // Imposta gli eventi click per i pulsanti
-    private void setupButtons() {
         btnMeasureCadence.setOnClickListener(v -> {
             if (!isMeasuringSensors) {
-                startSensorMeasurement(); // Avvia misurazione
+                startSensorMeasurement(); //avvia misurazione
             } else {
-                stopSensorMeasurement(); // Ferma misurazione
+                stopSensorMeasurement(); //ferma misurazione
             }
         });
 
-        btnSave.setOnClickListener(v -> saveSettings()); // Salva configurazione
-        btnLogout.setOnClickListener(v -> logout()); //Effettua logout
+        btnSave.setOnClickListener(v -> saveSettings());// Salva configurazione
+
+        btnLogout.setOnClickListener(v -> {
+            stopSensorMeasurement();
+            sessionManager.setLoggedIn(false);
+            sessionManager.setUsername(""); // optional clean-up
+            finish();
+        });
+
+        updateCadenceMethod();
     }
 
     private void updateTrainingDurationText() {
@@ -176,17 +163,18 @@ public class ClinicianActivity extends AppCompatActivity {
     // Salva la configurazione impostata dal clinico
     private void saveSettings() {
         String patientCode = etPatientCode.getText().toString().trim();
+
         if (patientCode.isEmpty()) {
-            Toast.makeText(this, R.string.enter_patient_code, Toast.LENGTH_SHORT).show(); // Added error message
+            Toast.makeText(this, R.string.enter_patient_code, Toast.LENGTH_SHORT).show();
             return;
         }
+
         if (rbManualCadence.isChecked()) {
             String cadenceStr = etManualCadence.getText().toString().trim();
             if (cadenceStr.isEmpty()) {
                 Toast.makeText(this, R.string.enter_cadence, Toast.LENGTH_SHORT).show();
                 return;
             }
-
             try {
                 bestCadence = Float.parseFloat(cadenceStr);
             } catch (NumberFormatException e) {
@@ -205,13 +193,13 @@ public class ClinicianActivity extends AppCompatActivity {
         data.setPatientCode(patientCode);
         data.setTrainingDuration(trainingDuration);
         data.setBestCadence(bestCadence);
+        data.setLastModifiedBy(loggedInClinician != null ? loggedInClinician.getUsername() : "unknown");
 
         dataManager.savePatientData(data);
         sessionManager.setActivePatientCode(patientCode);
 
-        Toast.makeText(this, "Settings saved for " + patientCode, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Settings saved by " + data.getLastModifiedBy(), Toast.LENGTH_SHORT).show();
     }
-
 
     // Carica eventuali dati salvati in precedenza
     private void loadExistingData() {
@@ -222,20 +210,11 @@ public class ClinicianActivity extends AppCompatActivity {
                 trainingDuration = data.getTrainingDuration();
                 bestCadence = data.getBestCadence();
                 etPatientCode.setText(data.getPatientCode());
-
                 sbTrainingDuration.setProgress(trainingDuration);
                 updateTrainingDurationText();
                 etManualCadence.setText(String.valueOf(bestCadence));
             }
         }
-    }
-
-    // Metodo di logout: azzera sessione e chiude l’attività
-    private void logout() {
-        stopSensorMeasurement();
-        sessionManager.setLoggedIn(false);
-        sessionManager.setUsername("");
-        finish();
     }
 
     // Ferma eventuali sensori alla distruzione dell’attività

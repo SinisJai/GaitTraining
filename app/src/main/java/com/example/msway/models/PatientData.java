@@ -45,4 +45,15 @@ public class PatientData implements Serializable {
                 ", bestCadence=" + bestCadence +
                 '}';
     }
+
+    private String lastModifiedBy;
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
 }

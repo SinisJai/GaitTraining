@@ -49,6 +49,7 @@ public class DataManager {
             json.put("patientCode", patientData.getPatientCode());
             json.put("trainingDuration", patientData.getTrainingDuration());
             json.put("bestCadence", patientData.getBestCadence());
+            json.put("lastModifiedBy", patientData.getLastModifiedBy());
 
             FileWriter writer = new FileWriter(patientDataFile);
             writer.write(json.toString());
@@ -56,6 +57,9 @@ public class DataManager {
             writer.close();
 
             Log.d(TAG, "Patient data saved as JSON: " + patientData.getPatientCode());
+
+            saveClinicianEditLog(patientData); // 👈 Audit log
+
         } catch (IOException | JSONException e) {
             Log.e(TAG, "Error saving patient data", e);
         }
@@ -63,8 +67,7 @@ public class DataManager {
 
     public PatientData getPatientData(String patientCode) {
         try {
-            File dataDir = new File(context.getFilesDir(), "mSWAY_data/patients");
-            File patientFile = new File(dataDir, patientCode + ".json");
+            File patientFile = new File(context.getFilesDir(), "mSWAY_data/patients/" + patientCode + ".json");
 
             if (!patientFile.exists()) return null;
 
@@ -81,11 +84,36 @@ public class DataManager {
             patientData.setPatientCode(json.getString("patientCode"));
             patientData.setTrainingDuration(json.getInt("trainingDuration"));
             patientData.setBestCadence((float) json.getDouble("bestCadence"));
+            if (json.has("lastModifiedBy")) {
+                patientData.setLastModifiedBy(json.getString("lastModifiedBy"));
+            }
 
             return patientData;
         } catch (IOException | JSONException e) {
             Log.e(TAG, "Error loading patient data", e);
             return null;
+        }
+    }
+
+    private void saveClinicianEditLog(PatientData data) {
+        try {
+            File logsDir = new File(context.getFilesDir(), "mSWAY_data/logs");
+            if (!logsDir.exists()) logsDir.mkdirs();
+
+            File logFile = new File(logsDir, data.getPatientCode() + "_log.json");
+
+            JSONObject logEntry = new JSONObject();
+            logEntry.put("timestamp", System.currentTimeMillis());
+            logEntry.put("modifiedBy", data.getLastModifiedBy());
+            logEntry.put("trainingDuration", data.getTrainingDuration());
+            logEntry.put("bestCadence", data.getBestCadence());
+
+            FileWriter writer = new FileWriter(logFile, true); // append
+            writer.write(logEntry.toString() + "\n");
+            writer.close();
+
+        } catch (IOException | JSONException e) {
+            Log.e(TAG, "Error writing clinician log", e);
         }
     }
 
@@ -164,9 +192,7 @@ public class DataManager {
     // ========= PREFERENCES: MUSIC GENRE =========
 
     public void saveSelectedMusicGenre(String genre) {
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(PREF_MUSIC_GENRE, genre);
-        editor.apply();
+        preferences.edit().putString(PREF_MUSIC_GENRE, genre).apply();
     }
 
     public String getSelectedMusicGenre() {

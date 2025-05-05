@@ -1,4 +1,4 @@
-package com.example.msway;
+package com.example.msway.models;
 
 
 import java.io.Serializable;

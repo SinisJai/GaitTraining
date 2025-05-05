@@ -21,6 +21,7 @@ public class PatientActivity extends AppCompatActivity {
 
     private Button btnStartTraining;
     private Button btnSelectMusic;
+    private Button btnRhythmSettings;
     private Button btnBack;
     private TextView tvTrainingDuration;
     private TextView tvBestCadence;
@@ -53,6 +54,7 @@ public class PatientActivity extends AppCompatActivity {
     private void initializeComponents() {
         btnStartTraining = findViewById(R.id.btnStartTraining);
         btnSelectMusic = findViewById(R.id.btnSelectMusic);
+        btnRhythmSettings = findViewById(R.id.btnRhythmSettings);
         btnBack = findViewById(R.id.btnBack);
         tvTrainingDuration = findViewById(R.id.tvTrainingDuration);
         tvBestCadence = findViewById(R.id.tvBestCadence);
@@ -64,6 +66,11 @@ public class PatientActivity extends AppCompatActivity {
 
         btnSelectMusic.setOnClickListener(v -> {
             Intent intent = new Intent(PatientActivity.this, MusicSelectionActivity.class);
+            startActivity(intent);
+        });
+
+        btnRhythmSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(PatientActivity.this, RhythmSelectionActivity.class);
             startActivity(intent);
         });
 

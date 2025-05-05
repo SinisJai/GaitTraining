@@ -1,9 +1,9 @@
 package com.example.msway.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.util.Log;
 
 import com.example.msway.R;
@@ -17,13 +17,9 @@ public class AudioManager {
 
     private Context context;
     private MediaPlayer backgroundPlayer;
-    private MediaPlayer rhythmPlayer;
 
     // Map to store genre to audio resource mapping
-    private Map<String, Integer> genreResourceMap;
-
-    // Resource ID for the rhythm sound
-    private int rhythmSoundResourceId;
+    private final Map<String, Integer> genreResourceMap = new HashMap<>();
 
     public AudioManager(Context context) {
         this.context = context;
@@ -31,12 +27,9 @@ public class AudioManager {
 
         // Create media players
         backgroundPlayer = new MediaPlayer();
-        rhythmPlayer = new MediaPlayer();
     }
 
     private void initializeGenreMap() {
-        genreResourceMap = new HashMap<>();
-
         // Map genre names to raw resource IDs
         // Note: These resource IDs are placeholders and should be replaced with actual resources
         genreResourceMap.put("Classical", R.raw.classical_music);
@@ -48,37 +41,31 @@ public class AudioManager {
         genreResourceMap.put("Ambient", R.raw.ambient_music);
         genreResourceMap.put("Hip Hop", R.raw.hiphop_music);
 
-        // Set rhythm sound (bass beat)
-        rhythmSoundResourceId = R.raw.rhythm_sound; // Using system sound as placeholder
     }
 
     public void playBackgroundMusic(String genre) {
         try {
             // Reset and release any existing player
-            if (backgroundPlayer.isPlaying()) {
-                backgroundPlayer.stop();
-            }
+            if (backgroundPlayer.isPlaying()) backgroundPlayer.stop();
             backgroundPlayer.reset();
 
             // Get the resource ID for the selected genre
-            Integer resourceId = genreResourceMap.get(genre);
-            if (resourceId == null) {
-                // Use default if genre not found
-                resourceId = R.raw.country_music;
-            }
+            Integer resourceId = genreResourceMap.getOrDefault(genre, R.raw.country_music);
 
             // Set up the media player with the resource
             AssetFileDescriptor afd = context.getResources().openRawResourceFd(resourceId);
-            if (afd == null) {
-                return;
-            }
+            if (afd == null) return;
 
             backgroundPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
 
+            SharedPreferences prefs = context.getSharedPreferences("mSWAYPrefs", Context.MODE_PRIVATE);
+            float userVolume = prefs.getFloat("music_volume", 1.0f);
+            float adjustedVolume = Math.min(1.0f, userVolume * 0.5f); // Lower baseline
+
             // Set looping and prepare
             backgroundPlayer.setLooping(true);
-            backgroundPlayer.setVolume(0.7f, 0.7f); // Set volume to 70%
+            backgroundPlayer.setVolume(adjustedVolume, adjustedVolume); // Set volume to 70%
             backgroundPlayer.prepare();
             backgroundPlayer.start();
 
@@ -95,24 +82,35 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Dynamically plays rhythm based on selected file name and volume stored in SharedPreferences.
+     */
     public void playRhythmSound() {
         try {
-            // Reset and release any existing rhythm player
-            rhythmPlayer.reset();
+            SharedPreferences prefs = context.getSharedPreferences("mSWAYPrefs", Context.MODE_PRIVATE);
+            String rhythmFileName = prefs.getString("selected_rhythm", "clap_downbeat");
+            float rhythmVolume = prefs.getFloat("rhythm_volume", 1.0f); //full by default
 
-            // Set up the media player with the rhythm sound resource
-            AssetFileDescriptor afd = context.getResources().openRawResourceFd(rhythmSoundResourceId);
-            if (afd == null) {
+            int resId = context.getResources().getIdentifier(rhythmFileName, "raw", context.getPackageName());
+            if (resId == 0) {
+                Log.w(TAG, "Invalid rhythm file name: " + rhythmFileName);
                 return;
             }
+
+            MediaPlayer rhythmPlayer = new MediaPlayer();
+            AssetFileDescriptor afd = context.getResources().openRawResourceFd(resId);
+            if (afd == null) return;
 
             rhythmPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
 
-            // Set volume and prepare
-            rhythmPlayer.setVolume(1.0f, 1.0f); // Full volume for rhythm
+            float adjustedRhythmVolume = Math.min(1.0f, rhythmVolume * 1.0f); // Full baseline
+            rhythmPlayer.setVolume(adjustedRhythmVolume, adjustedRhythmVolume);
+            rhythmPlayer.setOnCompletionListener(MediaPlayer::release);
             rhythmPlayer.prepare();
             rhythmPlayer.start();
+
+            Log.d(TAG, "Playing rhythm: " + rhythmFileName + " at volume:" + adjustedRhythmVolume);
         } catch (IOException e) {
             Log.e(TAG, "Error playing rhythm sound: " + e.getMessage());
         }
@@ -120,19 +118,9 @@ public class AudioManager {
 
     public void release() {
         if (backgroundPlayer != null) {
-            if (backgroundPlayer.isPlaying()) {
-                backgroundPlayer.stop();
-            }
+            if (backgroundPlayer.isPlaying()) backgroundPlayer.stop();
             backgroundPlayer.release();
             backgroundPlayer = null;
-        }
-
-        if (rhythmPlayer != null) {
-            if (rhythmPlayer.isPlaying()) {
-                rhythmPlayer.stop();
-            }
-            rhythmPlayer.release();
-            rhythmPlayer = null;
         }
     }
 }
