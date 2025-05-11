@@ -9,6 +9,7 @@ import com.example.msway.models.TrainingSession;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -161,6 +162,29 @@ public class DataManager {
         }
     }
 
+    public List<Long> getCadencePatternForPatient(String patientCode) {
+        File patternFile = new File(context.getFilesDir(), "mSWAY_data/patterns/" + patientCode + ".json");
+        if (!patternFile.exists()) return null;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(patternFile))) {
+            StringBuilder json = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) json.append(line);
+
+            JSONObject obj = new JSONObject(json.toString());
+            JSONArray arr = obj.getJSONArray("intervals");
+
+            List<Long> intervals = new ArrayList<>();
+            for (int i = 0; i < arr.length(); i++) {
+                intervals.add(arr.getLong(i));
+            }
+            return intervals;
+        } catch (IOException | JSONException e) {
+            Log.e("DataManager", "Failed to read cadence pattern: " + e.getMessage());
+            return null;
+        }
+    }
+
     public List<TrainingSession> getTrainingSessions() {
         List<TrainingSession> sessions = new ArrayList<>();
 
@@ -188,6 +212,31 @@ public class DataManager {
 
         return sessions;
     }
+
+    public void saveCadencePatternForPatient(String patientCode, List<Long> pattern) {
+        try {
+            File dataDir = new File(context.getFilesDir(), "mSWAY_data");
+            File patternsDir = new File(dataDir, "patterns");
+            if (!patternsDir.exists()) patternsDir.mkdirs();
+
+            File patternFile = new File(patternsDir, patientCode + ".json");
+            JSONObject obj = new JSONObject();
+            JSONArray arr = new JSONArray();
+            for (Long interval : pattern) {
+                arr.put(interval);
+            }
+            obj.put("intervals", arr);
+
+            FileWriter writer = new FileWriter(patternFile);
+            writer.write(obj.toString());
+            writer.close();
+
+            Log.d("DataManager", "Cadence pattern saved for " + patientCode);
+        } catch (IOException | JSONException e) {
+            Log.e("DataManager", "Failed to save pattern", e);
+        }
+    }
+
 
     // ========= PREFERENCES: MUSIC GENRE =========
 

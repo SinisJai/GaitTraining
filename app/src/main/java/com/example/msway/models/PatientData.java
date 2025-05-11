@@ -1,6 +1,7 @@
 package com.example.msway.models;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class PatientData implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -27,6 +28,25 @@ public class PatientData implements Serializable {
 
     public void setTrainingDuration(int trainingDuration) {
         this.trainingDuration = trainingDuration;
+    }
+
+    private String cadenceMode = "manual"; // default
+    private List<Long> cadencePattern;
+
+    public String getCadenceMode() {
+        return cadenceMode;
+    }
+
+    public void setCadenceMode(String cadenceMode) {
+        this.cadenceMode = cadenceMode;
+    }
+
+    public List<Long> getCadencePattern() {
+        return cadencePattern;
+    }
+
+    public void setCadencePattern(List<Long> cadencePattern) {
+        this.cadencePattern = cadencePattern;
     }
 
     public float getBestCadence() {

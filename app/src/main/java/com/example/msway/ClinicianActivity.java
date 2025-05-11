@@ -3,6 +3,7 @@ package com.example.msway;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
+import java.util.List;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,6 +26,8 @@ public class ClinicianActivity extends AppCompatActivity {
     private RadioGroup rgCadenceMethod;
     private RadioButton rbManualCadence;
     private RadioButton rbSensorCadence;
+    private RadioButton rbPatternCadence;
+
     private EditText etManualCadence;
     private Button btnMeasureCadence;
     private Button btnSave;
@@ -63,6 +66,7 @@ public class ClinicianActivity extends AppCompatActivity {
         initializeViews();
         setupListeners();
         loadExistingData();
+
     }
 
     // Metodo per inizializzare componenti UI e logica
@@ -72,6 +76,7 @@ public class ClinicianActivity extends AppCompatActivity {
         rgCadenceMethod = findViewById(R.id.rgCadenceMethod);
         rbManualCadence = findViewById(R.id.rbManualCadence);
         rbSensorCadence = findViewById(R.id.rbSensorCadence);
+        rbPatternCadence = findViewById(R.id.rbPatternCadence);
         etManualCadence = findViewById(R.id.etManualCadence);
         etPatientCode = findViewById(R.id.etPatientCode);
         btnMeasureCadence = findViewById(R.id.btnMeasureCadence);
@@ -113,7 +118,7 @@ public class ClinicianActivity extends AppCompatActivity {
             finish();
         });
 
-        updateCadenceMethod();
+        updateCadenceMethod(); //set correct field state on startup
     }
 
     private void updateTrainingDurationText() {
@@ -122,12 +127,17 @@ public class ClinicianActivity extends AppCompatActivity {
 
     // Abilita/disabilita campi in base al metodo di cadenza scelto
     private void updateCadenceMethod() {
-        boolean isManual = rbManualCadence.isChecked();
-        etManualCadence.setEnabled(isManual);
-        btnMeasureCadence.setEnabled(!isManual);
-
-        if (isManual) {
-            stopSensorMeasurement(); // Ferma i sensori se si passa al manuale
+        if (rbManualCadence.isChecked()) {
+            etManualCadence.setEnabled(true);
+            btnMeasureCadence.setEnabled(false);
+            stopSensorMeasurement();
+        } else if (rbSensorCadence.isChecked()) {
+            etManualCadence.setEnabled(false);
+            btnMeasureCadence.setEnabled(true);
+        } else if (rbPatternCadence.isChecked()) {
+            etManualCadence.setEnabled(false);
+            btnMeasureCadence.setEnabled(false);
+            stopSensorMeasurement();
         }
     }
 
@@ -162,6 +172,7 @@ public class ClinicianActivity extends AppCompatActivity {
 
     // Salva la configurazione impostata dal clinico
     private void saveSettings() {
+
         String patientCode = etPatientCode.getText().toString().trim();
 
         if (patientCode.isEmpty()) {
@@ -169,7 +180,26 @@ public class ClinicianActivity extends AppCompatActivity {
             return;
         }
 
-        if (rbManualCadence.isChecked()) {
+        // Crea oggetto con i dati del paziente e salva
+        PatientData data = new PatientData();
+        data.setPatientCode(patientCode);
+        data.setTrainingDuration(trainingDuration);
+        data.setLastModifiedBy(loggedInClinician != null ? loggedInClinician.getUsername() : "unknown");
+
+        String cadenceMode;
+        if (rbPatternCadence.isChecked()) {
+            cadenceMode = "pattern";
+            List<Long> pattern = dataManager.getCadencePatternForPatient(patientCode);
+            if (pattern == null || pattern.isEmpty()) {
+                Toast.makeText(this, "No recorded pattern found for this patient", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            data.setCadencePattern(pattern);
+            bestCadence = 60; // dummy fallback to avoid 0 division later
+        } else if (rbSensorCadence.isChecked()) {
+            cadenceMode = "sensor";
+        } else {
+            cadenceMode = "manual";
             String cadenceStr = etManualCadence.getText().toString().trim();
             if (cadenceStr.isEmpty()) {
                 Toast.makeText(this, R.string.enter_cadence, Toast.LENGTH_SHORT).show();
@@ -188,12 +218,8 @@ public class ClinicianActivity extends AppCompatActivity {
             return;
         }
 
-        // Crea oggetto con i dati del paziente e salva
-        PatientData data = new PatientData();
-        data.setPatientCode(patientCode);
-        data.setTrainingDuration(trainingDuration);
+        data.setCadenceMode(cadenceMode);
         data.setBestCadence(bestCadence);
-        data.setLastModifiedBy(loggedInClinician != null ? loggedInClinician.getUsername() : "unknown");
 
         dataManager.savePatientData(data);
         sessionManager.setActivePatientCode(patientCode);

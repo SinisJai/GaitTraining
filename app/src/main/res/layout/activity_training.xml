@@ -73,7 +73,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/current_cadence_value"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:layout_marginTop="8dp"/>
 
             <TextView
@@ -81,7 +81,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/target_cadence_value"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:layout_marginTop="8dp"/>
 
             <TextView
@@ -89,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/music_genre_value"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:layout_marginTop="8dp"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -99,7 +99,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/training_instructions"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:textStyle="italic"
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -111,7 +111,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/stop_training"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:padding="16dp"
         android:background="@drawable/button_background"
         android:textColor="@color/white"

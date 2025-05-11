@@ -3,18 +3,18 @@
     <string name="enter_cadence">Inserire un valure di cadenza</string>
     <string name="save_error">Errore nel salvataggio</string>
 
-    <string name="app_name">Gait Training</string>
+    <string name="app_name">StepSync</string>
     <string name="patient_code">Codice Paziente</string>
     <string name="enter_patient_code">Inserisci codice paziente</string>
     <string name="invalid_patient_code">Inserire un codice paziente valido</string>
 
     <!-- General strings -->
-    <string name="back">Indietro</string>
+    <string name="back">INDIETRO</string>
     <string name="save">Salva</string>
     <string name="ok">OK</string>
     <string name="yes">Si</string>
     <string name="no">No</string>
-    <string name="logout">Esci</string>
+    <string name="logout">ESCI</string>
 
     <!-- Main Activity -->
     <string name="app_description">Musica per il tuo allenamento</string>
@@ -49,8 +49,9 @@
     <string name="training_duration_settings">Impostazioni durata allenamento</string>
     <string name="training_duration_minutes">Durata allenamento: %d minuti</string>
     <string name="cadence_settings">Impostazioni cadenza</string>
-    <string name="manual_cadence_entry">Inserimento manuale cadenza</string>
-    <string name="sensor_based_cadence">Misurazione cadenza tramite sensori</string>
+    <string name="manual_cadence_entry">Inserisci cadenza manualmente</string>
+    <string name="sensor_based_cadence">Misura cadenza tramite sensori</string>
+    <string name="stored_cadence">Carica cadenza</string>
     <string name="enter_cadence_steps_per_minute">Inserisci cadenza (passi al minuto)</string>
     <string name="measure_cadence">Misura cadenza</string>
     <string name="stop_measuring">Interrompi rilevamento</string>
@@ -68,6 +69,9 @@
     <string name="no_music_selected">Nessun genere musicale selezionato</string>
     <string name="currently_selected_genre">Selezione corrente: %s</string>
     <string name="music_genre_selected">Genere selezionato: %s </string>
+
+    <!-- Rhythm Selection Activity -->
+    <string name="select_rhythm_type">Seleziona il ritmo da sovrapporre</string>
 
     <!-- Training Activity -->
     <string name="training_session">Sessione di allenamento</string>

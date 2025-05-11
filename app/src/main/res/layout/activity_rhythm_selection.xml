@@ -11,9 +11,8 @@
         android:orientation="vertical">
 
         <TextView
-            android:text="Select a Rhythm Sound:"
-            android:textStyle="bold"
-            android:textSize="18sp"
+            android:text="@string/select_rhythm_type"
+            style="@style/SectionTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp" />
@@ -22,13 +21,15 @@
             android:id="@+id/rgRhythms"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="18sp"
             android:layout_marginBottom="24dp" />
 
         <TextView
-            android:text="Rhythm Volume"
+            android:text="Volume del ritmo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
+            android:textSize="18sp"
             android:layout_marginTop="8dp" />
         <SeekBar
             android:id="@+id/sbRhythmVolume"
@@ -37,10 +38,11 @@
             android:max="100" />
 
         <TextView
-            android:text="Music Volume"
+            android:text="Volume della musica"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
+            android:textSize="18sp"
             android:layout_marginTop="16dp" />
         <SeekBar
             android:id="@+id/sbMusicVolume"
@@ -53,7 +55,8 @@
             android:id="@+id/btnBackRhythm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Back"
+            android:text="@string/back"
+            style="@style/BackButton"
             android:layout_marginTop="24dp"
             android:soundEffectsEnabled="false" />
     </LinearLayout>

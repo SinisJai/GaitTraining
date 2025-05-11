@@ -61,7 +61,7 @@ public class AudioManager {
 
             SharedPreferences prefs = context.getSharedPreferences("mSWAYPrefs", Context.MODE_PRIVATE);
             float userVolume = prefs.getFloat("music_volume", 1.0f);
-            float adjustedVolume = Math.min(1.0f, userVolume * 0.5f); // Lower baseline
+            float adjustedVolume = Math.max(0.3f, Math.min(1.0f, userVolume * 0.7f)); // Lower baseline
 
             // Set looping and prepare
             backgroundPlayer.setLooping(true);
@@ -104,7 +104,7 @@ public class AudioManager {
             rhythmPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
 
-            float adjustedRhythmVolume = Math.min(1.0f, rhythmVolume * 1.0f); // Full baseline
+            float adjustedRhythmVolume = Math.max(0.5f, Math.min(1.0f, rhythmVolume * 1.0f));// Full baseline
             rhythmPlayer.setVolume(adjustedRhythmVolume, adjustedRhythmVolume);
             rhythmPlayer.setOnCompletionListener(MediaPlayer::release);
             rhythmPlayer.prepare();

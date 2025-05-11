@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.List;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
@@ -68,6 +69,9 @@ public class TrainingActivity extends AppCompatActivity {
     private Handler rhythmHandler = new Handler();
     private Runnable rhythmRunnable;
     private long rhythmInterval;
+    private List<Long> rhythmPattern;
+    private int intervalIndex = 0;
+
 
     private TrainingSession currentSession;
 
@@ -129,14 +133,24 @@ public class TrainingActivity extends AppCompatActivity {
             selectedMusicGenre = "Rock"; // Default music genre
         }
 
+        String mode = patientData.getCadenceMode();
+        if ("pattern".equals(mode)) {
+            rhythmPattern = patientData.getCadencePattern();
+            if (rhythmPattern == null || rhythmPattern.isEmpty()) {
+                Toast.makeText(this, "Missing cadence pattern", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } else {
+            targetCadence = patientData.getBestCadence();
+            // Calcola intervallo ritmo in ms basato sulla cadenza
+            // Cadenza è passi al minuto, quindi va convertito in intervallo tra passi
+            rhythmInterval = (long)((float) ((float)60000 / targetCadence));
+        }
+
         // Imposta i parametri per la sessione
-        targetCadence = patientData.getBestCadence();
         trainingDurationMs = TimeUnit.MINUTES.toMillis(patientData.getTrainingDuration());
         remainingTimeMs = trainingDurationMs;
-
-        // Calcola intervallo ritmo in ms basato sulla cadenza
-        // Cadenza è passi al minuto, quindi va convertito in intervallo tra passi
-        rhythmInterval = (long)((float) ((float)60000 / targetCadence));
 
         // Aggiorna UI
         tvTargetCadence.setText(getString(R.string.target_cadence_value, targetCadence));
@@ -198,25 +212,47 @@ public class TrainingActivity extends AppCompatActivity {
 
         int resId = getResources().getIdentifier(rhythmName, "raw", getPackageName());
 
-        rhythmRunnable = new Runnable() {
-            @Override
-            public void run() {
-                Log.d("prova ritmo 1","isTrainingActive:"+isTrainingActive);
-                if (isTrainingActive) {
-                    Log.d("prova ritmo 2","sono qui:"+rhythmInterval);
+        if ("pattern".equals(patientData.getCadenceMode())) {
+            intervalIndex = 0;
+            rhythmRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (!isTrainingActive || intervalIndex >= rhythmPattern.size()) return;
+
                     MediaPlayer rhythmPlayer = MediaPlayer.create(TrainingActivity.this, resId);
                     if (rhythmPlayer != null) {
-                        rhythmPlayer.setVolume(rhythmVolume, rhythmVolume); // 🆕 Apply volume
+                        rhythmPlayer.setVolume(rhythmVolume, rhythmVolume);
                         rhythmPlayer.setOnCompletionListener(MediaPlayer::release);
                         rhythmPlayer.start();
                     }
-                    rhythmHandler.postDelayed(this, rhythmInterval);
+
+                    long nextInterval = rhythmPattern.get(intervalIndex);
+                    intervalIndex++;
+                    rhythmHandler.postDelayed(this, nextInterval);
                 }
-            }
-        };
+            };
+        } else {
+            rhythmRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("prova ritmo 1", "isTrainingActive:" + isTrainingActive);
+                    if (isTrainingActive) {
+                        Log.d("prova ritmo 2", "sono qui:" + rhythmInterval);
+                        MediaPlayer rhythmPlayer = MediaPlayer.create(TrainingActivity.this, resId);
+                        if (rhythmPlayer != null) {
+                            rhythmPlayer.setVolume(rhythmVolume, rhythmVolume); // 🆕 Apply volume
+                            rhythmPlayer.setOnCompletionListener(MediaPlayer::release);
+                            rhythmPlayer.start();
+                        }
+                        rhythmHandler.postDelayed(this, rhythmInterval);
+                    }
+                }
+            };
+        }
 
         rhythmHandler.post(rhythmRunnable);
     }
+                
 
     // Vibrazione se la cadenza è distante dal target
     private void provideCadenceFeedback() {

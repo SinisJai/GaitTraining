@@ -13,9 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/clinician_panel"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/dark_blue"
+        style="@style/AppTitleText"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -53,8 +51,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/patient_code"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        style="@style/SectionTitle"
                         android:layout_marginBottom="16dp"/>
 
                     <EditText
@@ -69,8 +66,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/training_duration_settings"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        style="@style/SectionTitle"
                         android:layout_marginBottom="16dp"/>
 
                     <TextView
@@ -78,7 +74,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/training_duration_minutes"
-                        android:textSize="16sp"
+                        android:textSize="18sp"
                         android:layout_marginBottom="8dp"/>
 
                     <SeekBar
@@ -108,8 +104,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/cadence_settings"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        style="@style/SectionTitle"
                         android:layout_marginBottom="16dp"/>
 
                     <RadioGroup
@@ -120,6 +115,7 @@
 
                         <RadioButton
                             android:id="@+id/rbManualCadence"
+                            style="@style/RadioButtonOption"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/manual_cadence_entry"
@@ -127,9 +123,18 @@
 
                         <RadioButton
                             android:id="@+id/rbSensorCadence"
+                            style="@style/RadioButtonOption"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/sensor_based_cadence"/>
+
+
+                        <RadioButton
+                            android:id="@+id/rbPatternCadence"
+                            style="@style/RadioButtonOption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/stored_cadence" />
                     </RadioGroup>
 
                     <EditText
@@ -145,6 +150,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/measure_cadence"
+                        android:textSize="16sp"
                         android:layout_marginTop="8dp"
                         android:enabled="false"
                         android:background="@drawable/button_background"/>
@@ -153,7 +159,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/sensor_instructions"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textStyle="italic"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
@@ -164,22 +170,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/save_settings"
-                android:textSize="18sp"
-                android:padding="16dp"
+                style="@style/PrimaryButton"
                 android:layout_marginTop="24dp"
                 android:drawableStart="@drawable/ic_settings"
-                android:drawablePadding="8dp"
-                android:background="@drawable/button_background"/>
+                android:drawablePadding="8dp" />
         </LinearLayout>
     </ScrollView>
 
     <Button
         android:id="@+id/btnLogout"
-        style="@style/Widget.AppCompat.Button.Borderless"
+        style="@style/BackButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/logout"
-        android:textColor="@color/navy_blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

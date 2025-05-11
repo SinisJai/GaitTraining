@@ -27,7 +27,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/app_description"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:textAlignment="center"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="48dp"
@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/patient_mode"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:padding="16dp"
             android:layout_marginBottom="16dp"
             android:background="@drawable/button_background" />
@@ -62,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/clinician_mode"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:padding="16dp"
             android:background="@drawable/button_background" />
     </LinearLayout>
