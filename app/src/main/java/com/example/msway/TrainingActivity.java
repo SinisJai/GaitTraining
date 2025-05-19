@@ -6,7 +6,6 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -51,7 +50,6 @@ public class TrainingActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private AudioManager audioManager;
     private SensorManager sensorManager;
-    private Vibrator vibrator;
 
     // Dati del paziente e parametri di allenamento
     private PatientData patientData;
@@ -104,7 +102,6 @@ public class TrainingActivity extends AppCompatActivity {
         sessionManager = new SessionManager(getApplicationContext());
         audioManager = new AudioManager(this);
         sensorManager = new SensorManager(this);
-        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         // Pulsante per fermare l'allenamento
         btnStopTraining.setOnClickListener(new View.OnClickListener() {
@@ -253,18 +250,6 @@ public class TrainingActivity extends AppCompatActivity {
         rhythmHandler.post(rhythmRunnable);
     }
                 
-
-    // Vibrazione se la cadenza è distante dal target
-    private void provideCadenceFeedback() {
-        // Calcola la differenza tra cadenza attuale e obbiettivo
-        float cadenceDiff = Math.abs(currentCadence - targetCadence);
-        float percentDiff = (cadenceDiff / targetCadence) * 100;
-
-        // Fornisce feedback se cadenza è troppo distante da obbiettivo
-        if (percentDiff > 15 && vibrator != null && vibrator.hasVibrator()) {
-            vibrator.vibrate(200);// Vibrazione di 200ms
-        }
-    }
 
     // Avvia il conto alla rovescia dell’allenamento
     private void startTrainingTimer() {
