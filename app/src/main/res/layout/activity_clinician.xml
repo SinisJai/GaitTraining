@@ -14,7 +14,6 @@
         android:layout_height="wrap_content"
         android:text="@string/clinician_panel"
         style="@style/AppTitleText"
-        android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,7 +21,7 @@
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@+id/btnLogout"
         app:layout_constraintEnd_toEndOf="parent"
@@ -173,7 +172,7 @@
                 style="@style/PrimaryButton"
                 android:layout_marginTop="24dp"
                 android:drawableStart="@drawable/ic_settings"
-                android:drawablePadding="8dp" />
+                android:drawablePadding="6dp" />
         </LinearLayout>
     </ScrollView>
 

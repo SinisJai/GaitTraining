@@ -3,18 +3,18 @@
     <string name="enter_cadence">Inserire un valure di cadenza</string>
     <string name="save_error">Errore nel salvataggio</string>
 
-    <string name="app_name">StepSync</string>
+    <string name="app_name">Stepify</string>
     <string name="patient_code">Codice Paziente</string>
     <string name="enter_patient_code">Inserisci codice paziente</string>
     <string name="invalid_patient_code">Inserire un codice paziente valido</string>
 
     <!-- General strings -->
-    <string name="back">INDIETRO</string>
+    <string name="back">Indietro</string>
     <string name="save">Salva</string>
     <string name="ok">OK</string>
     <string name="yes">Si</string>
     <string name="no">No</string>
-    <string name="logout">ESCI</string>
+    <string name="logout">Esci</string>
 
     <!-- Main Activity -->
     <string name="app_description">Musica per il tuo allenamento</string>
