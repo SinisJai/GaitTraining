@@ -32,14 +32,11 @@ public class AudioManager {
     private void initializeGenreMap() {
         // Map genre names to raw resource IDs
         // Note: These resource IDs are placeholders and should be replaced with actual resources
-        genreResourceMap.put("Classical", R.raw.classical_music);
-        genreResourceMap.put("Jazz", R.raw.jazz_music);
-        genreResourceMap.put("Pop", R.raw.pop_music);
-        genreResourceMap.put("Rock", R.raw.rock_music);
-        genreResourceMap.put("Electronic", R.raw.electronic_music);
-        genreResourceMap.put("Country", R.raw.country_music);
+        genreResourceMap.put("Italiana", R.raw.italian_music);
+        genreResourceMap.put("Disco", R.raw.disco_music);
+        genreResourceMap.put("Funk", R.raw.funk_music);
         genreResourceMap.put("Ambient", R.raw.ambient_music);
-        genreResourceMap.put("Hip Hop", R.raw.hiphop_music);
+        genreResourceMap.put("Classical", R.raw.classical_music);
 
     }
 
@@ -50,7 +47,7 @@ public class AudioManager {
             backgroundPlayer.reset();
 
             // Get the resource ID for the selected genre
-            Integer resourceId = genreResourceMap.getOrDefault(genre, R.raw.country_music);
+            Integer resourceId = genreResourceMap.getOrDefault(genre, R.raw.italian_music);
 
             // Set up the media player with the resource
             AssetFileDescriptor afd = context.getResources().openRawResourceFd(resourceId);

@@ -24,14 +24,11 @@ public class MusicSelectionActivity extends AppCompatActivity {
     private DataManager dataManager;
 
     private String[] musicGenres = {
-            "Classical",
-            "Jazz",
-            "Pop",
-            "Rock",
-            "Electronic",
-            "Country",
+            "Italiana",
+            "Disco",
+            "Funk",
             "Ambient",
-            "Hip Hop"
+            "Classical"
     };
 
     private String selectedGenre;

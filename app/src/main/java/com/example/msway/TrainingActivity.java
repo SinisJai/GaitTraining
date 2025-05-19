@@ -194,7 +194,6 @@ public class TrainingActivity extends AppCompatActivity {
         sensorManager.startMeasuring(cadence -> runOnUiThread(() -> {
             currentCadence = cadence;
             tvCurrentCadence.setText(getString(R.string.current_cadence_value, currentCadence));
-            provideCadenceFeedback(); //vibrazione se la cadenza è errata
         }));
 
         startRhythmSounds();     // Avvia suoni ritmici
