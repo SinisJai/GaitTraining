@@ -3,8 +3,11 @@ package com.example.msway.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
+import android.media.AudioAttributes;                                        // NEW
+import android.media.SoundPool;
 import android.util.Log;
 import android.net.Uri;
+import android.os.SystemClock;
 
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackParameters;
@@ -16,6 +19,10 @@ import com.example.msway.R;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;                                        // NEW
+import java.util.concurrent.ScheduledExecutorService;                        // NEW
+import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 public class AudioManager {
     private static final String TAG = "AudioManager";
@@ -26,9 +33,27 @@ public class AudioManager {
     // Map to store genre to audio resource mapping
     private final Map<String, Integer> genreResourceMap = new HashMap<>();
 
+    // NEW: SoundPool for low-latency beeps
+    private SoundPool soundPool;
+    private int beepSoundId;
+    private ScheduledExecutorService scheduler;
+
     public AudioManager(Context context) {
         this.context = context;
         initializeGenreMap();
+
+        // NEW: Initialize SoundPool and scheduler
+        AudioAttributes attrs = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        soundPool = new SoundPool.Builder()
+                .setMaxStreams(1)
+                .setAudioAttributes(attrs)
+                .build();
+        // Load a default beep sound; replace R.raw.beep with your beep resource
+        beepSoundId = soundPool.load(context, R.raw.clap_downbeat, 1);
+        scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
     private void initializeGenreMap() {
@@ -39,7 +64,6 @@ public class AudioManager {
         genreResourceMap.put("Funk", R.raw.funk_music);
         genreResourceMap.put("Ambient", R.raw.ambient_music);
         genreResourceMap.put("Classical", R.raw.classical_music);
-
     }
 
     public void playBackgroundMusic(String genre, float targetCadence, Runnable onPlaybackStart) {
@@ -85,37 +109,29 @@ public class AudioManager {
 
 
     /**
-     * Dynamically plays rhythm based on selected file name and volume stored in SharedPreferences.
-     */
-    public void playRhythmSound() {
-        SharedPreferences prefs = context.getSharedPreferences("mSWAYPrefs", Context.MODE_PRIVATE);
-        String rhythmFileName = prefs.getString("selected_rhythm", "clap_downbeat");
-        float rhythmVolume = prefs.getFloat("rhythm_volume", 1.0f);
+     +     * Schedule rhythmic beeps at the specified intervals using SoundPool.
+     +     * @param rhythmPattern list of intervals (ms) between beeps.
+     +     */
+    public void playRhythmSound () {
+        // Cancel any pending schedules
+        scheduler.shutdownNow();
+        scheduler = Executors.newSingleThreadScheduledExecutor();
 
-        int resId = context.getResources().getIdentifier(rhythmFileName, "raw", context.getPackageName());
-        if (resId == 0) {
-            Log.w(TAG, "Invalid rhythm file: " + rhythmFileName);
-            return;
-        }
-        ExoPlayer rhythmPlayer = new ExoPlayer.Builder(context).build();
-        MediaItem item = MediaItem.fromUri("android.resource://" + context.getPackageName() + "/" + resId);
-        rhythmPlayer.setMediaItem(item);
-        rhythmPlayer.setVolume(Math.max(0.5f, Math.min(1.0f, rhythmVolume)));
-        rhythmPlayer.setPlaybackParameters(new PlaybackParameters(1.0f));
-        rhythmPlayer.setRepeatMode(ExoPlayer.REPEAT_MODE_OFF);
-        rhythmPlayer.setPlayWhenReady(true);
-        rhythmPlayer.addListener(new Player.Listener() {
-            @Override
-            public void onPlaybackStateChanged(int state) {
-                if (state == Player.STATE_ENDED) {
-                    rhythmPlayer.release();
-                }
-            }
-        });
-        rhythmPlayer.prepare();
+        SharedPreferences prefs = context.getSharedPreferences("mSWAYPrefs", Context.MODE_PRIVATE);
+        float rhythmVolume = prefs.getFloat("rhythm_volume", 1.0f);
+        float v = Math.max(0.3f, Math.min(1.0f, rhythmVolume));
+        soundPool.play(beepSoundId, v, v, 1, 0, 1f);
     }
 
     public void release() {
         stopBackgroundMusic();
+        if (soundPool != null) {
+            soundPool.release();
+            soundPool = null;
+        }
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+            scheduler = null;
+        }
     }
 }

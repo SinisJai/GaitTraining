@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.List;
+import java.util.ArrayList;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
@@ -127,7 +128,7 @@ public class TrainingActivity extends AppCompatActivity {
 
         // Imposta un genere musicale di default se non specificato
         if (selectedMusicGenre == null || selectedMusicGenre.isEmpty()) {
-            selectedMusicGenre = "Rock"; // Default music genre
+            selectedMusicGenre = "Classical"; // Default music genre
         }
 
         String mode = patientData.getCadenceMode();
@@ -190,6 +191,7 @@ public class TrainingActivity extends AppCompatActivity {
         isTrainingActive = true;
         // Sync music and rhythm on ExoPlayer playback start
         audioManager.playBackgroundMusic(selectedMusicGenre, targetCadence, () -> {
+            //sensor cadence
             sensorManager.startMeasuring(cadence -> runOnUiThread(() -> {
                 currentCadence = cadence;
                 tvCurrentCadence.setText(
@@ -203,53 +205,30 @@ public class TrainingActivity extends AppCompatActivity {
 
     // Avvio dei suoni ritmici periodici
     private void startRhythmSounds() {
-        SharedPreferences prefs = getSharedPreferences("mSWAYPrefs", MODE_PRIVATE);
-        String rhythmName = prefs.getString("selected_rhythm", "clap_downbeat"); // 🆕 default
-        float rhythmVolume = prefs.getFloat("rhythm_volume", 1.0f); // 🆕 0.0 to 1.0
-
-        int resId = getResources().getIdentifier(rhythmName, "raw", getPackageName());
-
+        List<Long> patternList = new ArrayList<>();
         if ("pattern".equals(patientData.getCadenceMode())) {
-            intervalIndex = 0;
-            rhythmRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    if (!isTrainingActive || intervalIndex >= rhythmPattern.size()) return;
-
-                    MediaPlayer rhythmPlayer = MediaPlayer.create(TrainingActivity.this, resId);
-                    if (rhythmPlayer != null) {
-                        rhythmPlayer.setVolume(rhythmVolume, rhythmVolume);
-                        rhythmPlayer.setOnCompletionListener(MediaPlayer::release);
-                        rhythmPlayer.start();
-                    }
-
-                    long nextInterval = rhythmPattern.get(intervalIndex);
-                    intervalIndex++;
-                    rhythmHandler.postDelayed(this, nextInterval);
-                }
-            };
+            // Use the full recorded pattern
+            patternList.addAll(rhythmPattern);
         } else {
-            rhythmRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    Log.d("prova ritmo 1", "isTrainingActive:" + isTrainingActive);
-                    if (isTrainingActive) {
-                        Log.d("prova ritmo 2", "sono qui:" + rhythmInterval);
-                        MediaPlayer rhythmPlayer = MediaPlayer.create(TrainingActivity.this, resId);
-                        if (rhythmPlayer != null) {
-                            rhythmPlayer.setVolume(rhythmVolume, rhythmVolume); // 🆕 Apply volume
-                            rhythmPlayer.setOnCompletionListener(MediaPlayer::release);
-                            rhythmPlayer.start();
-                        }
-                        rhythmHandler.postDelayed(this, rhythmInterval);
-                    }
-                }
-            };
+            int beats = (int)(trainingDurationMs / rhythmInterval);
+            for (int i = 0; i < beats; i++) {
+                patternList.add(rhythmInterval);
+            }
         }
 
+        intervalIndex = 0;
+        rhythmRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!isTrainingActive || intervalIndex >= patternList.size()) return;
+                // single‐shot beep via SoundPool
+                audioManager.playRhythmSound();
+                long next = patternList.get(intervalIndex++);
+                rhythmHandler.postDelayed(this, next);
+            }
+        };
         rhythmHandler.post(rhythmRunnable);
     }
-                
 
     // Avvia il conto alla rovescia dell’allenamento
     private void startTrainingTimer() {
@@ -280,9 +259,7 @@ public class TrainingActivity extends AppCompatActivity {
                 pbTrainingProgress.setProgress(100);
                 completeTrainingSession();// Fine sessione
             }
-        };
-
-        trainingTimer.start();
+        }.start();
     }
 
     // Completa e salva la sessione di allenamento
@@ -365,6 +342,6 @@ public class TrainingActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         stopTrainingProcesses();// Ferma tutto se activity viene chiusa
-        audioManager.stopBackgroundMusic();
+        audioManager.release();
     }
 }
