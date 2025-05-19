@@ -140,6 +140,8 @@ public class TrainingActivity extends AppCompatActivity {
             }
         } else {
             targetCadence = patientData.getBestCadence();
+            SharedPreferences prefs = getSharedPreferences("mSWAYPrefs", MODE_PRIVATE);
+            prefs.edit().putFloat("target_cadence", targetCadence).apply(); // 🆕 save to prefs
             // Calcola intervallo ritmo in ms basato sulla cadenza
             // Cadenza è passi al minuto, quindi va convertito in intervallo tra passi
             rhythmInterval = (long)((float) ((float)60000 / targetCadence));
@@ -186,18 +188,17 @@ public class TrainingActivity extends AppCompatActivity {
     // Inizia la sessione di allenamento
     private void startTrainingSession() {
         isTrainingActive = true;
-
-        // Avvia musica di sottofondo
-        audioManager.playBackgroundMusic(selectedMusicGenre);
-
-        // Inizia la misurazione della cadenza tramite sensori
-        sensorManager.startMeasuring(cadence -> runOnUiThread(() -> {
-            currentCadence = cadence;
-            tvCurrentCadence.setText(getString(R.string.current_cadence_value, currentCadence));
-        }));
-
-        startRhythmSounds();     // Avvia suoni ritmici
-        startTrainingTimer();    // Avvia il timer della sessione
+        // Sync music and rhythm on ExoPlayer playback start
+        audioManager.playBackgroundMusic(selectedMusicGenre, targetCadence, () -> {
+            sensorManager.startMeasuring(cadence -> runOnUiThread(() -> {
+                currentCadence = cadence;
+                tvCurrentCadence.setText(
+                        getString(R.string.current_cadence_value, currentCadence)
+                );
+            }));
+            startRhythmSounds();
+        });
+        startTrainingTimer();
     }
 
     // Avvio dei suoni ritmici periodici
@@ -364,5 +365,6 @@ public class TrainingActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         stopTrainingProcesses();// Ferma tutto se activity viene chiusa
+        audioManager.stopBackgroundMusic();
     }
 }
