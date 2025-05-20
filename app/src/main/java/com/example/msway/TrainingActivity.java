@@ -132,6 +132,8 @@ public class TrainingActivity extends AppCompatActivity {
         }
 
         String mode = patientData.getCadenceMode();
+        SharedPreferences prefs = getSharedPreferences("mSWAYPrefs", MODE_PRIVATE);
+        boolean useMeanForPattern = prefs.getBoolean("pattern_use_mean", false);
         if ("pattern".equals(mode)) {
             rhythmPattern = patientData.getCadencePattern();
             if (rhythmPattern == null || rhythmPattern.isEmpty()) {
@@ -140,22 +142,23 @@ public class TrainingActivity extends AppCompatActivity {
                 return;
             }
             // Even in pattern mode, compute mean for music
-            targetCadence = calculateMeanCadence(rhythmPattern);
+            if (useMeanForPattern) {
+                targetCadence = calculateMeanCadence(rhythmPattern);
+            } else {
+                targetCadence = calculateMeanCadence(rhythmPattern); // fallback value
+            }
         } else {
             targetCadence = patientData.getBestCadence();
         }
 
+        rhythmInterval = (long)((float) ((float)60000 / targetCadence));
+
         // Store for global access (background music uses SharedPrefs)
-        SharedPreferences prefs = getSharedPreferences("mSWAYPrefs", MODE_PRIVATE);
         prefs.edit().putFloat("target_cadence", targetCadence).apply(); // 🆕 save to prefs
 
         // In mean mode, also compute rhythmInterval
         // Calcola intervallo ritmo in ms basato sulla cadenza
         // Cadenza è passi al minuto, quindi va convertito in intervallo tra passi
-
-        if (!"pattern".equals(mode)) {
-            rhythmInterval = (long)((float) ((float)60000 / targetCadence));
-        }
 
         // Imposta i parametri per la sessione
         trainingDurationMs = TimeUnit.MINUTES.toMillis(patientData.getTrainingDuration());
@@ -224,9 +227,17 @@ public class TrainingActivity extends AppCompatActivity {
     // Avvio dei suoni ritmici periodici
     private void startRhythmSounds() {
         List<Long> patternList = new ArrayList<>();
+        boolean useMean = getSharedPreferences("mSWAYPrefs", MODE_PRIVATE)
+                .getBoolean("pattern_use_mean", false);
         if ("pattern".equals(patientData.getCadenceMode())) {
-            // Use the full recorded pattern
-            patternList.addAll(rhythmPattern);
+            if (useMean) {
+                int beats = (int)(trainingDurationMs / rhythmInterval);
+                for (int i = 0; i < beats; i++) {
+                    patternList.add(rhythmInterval);
+                }
+            } else {
+                patternList.addAll(rhythmPattern);//use the full recorded pattern
+            }
         } else {
             int beats = (int)(trainingDurationMs / rhythmInterval);
             for (int i = 0; i < beats; i++) {

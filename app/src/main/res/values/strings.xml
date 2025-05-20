@@ -49,10 +49,10 @@
     <string name="training_duration_settings">Impostazioni durata allenamento</string>
     <string name="training_duration_minutes">Durata allenamento: %d minuti</string>
     <string name="cadence_settings">Impostazioni cadenza</string>
-    <string name="manual_cadence_entry">Inserisci cadenza manualmente</string>
+    <string name="manual_cadence_entry">Inserisci manualmente</string>
     <string name="sensor_based_cadence">Misura cadenza tramite sensori</string>
     <string name="stored_cadence">Carica cadenza</string>
-    <string name="enter_cadence_steps_per_minute">Inserisci cadenza (passi al minuto)</string>
+    <string name="enter_cadence_steps_per_minute">Cadenza (ppm)</string>
     <string name="measure_cadence">Misura cadenza</string>
     <string name="stop_measuring">Interrompi rilevamento</string>
     <string name="sensor_instructions">Prima della misurazione, posizionare i sensori sui piedi e sulla schiena</string>

@@ -27,6 +27,10 @@ public class ClinicianActivity extends AppCompatActivity {
     private RadioButton rbManualCadence;
     private RadioButton rbPatternCadence;
 
+    private RadioGroup rgPatternMode;
+    private RadioButton rbPatternWhole;
+    private RadioButton rbPatternMean;
+
     private TextView tvMeasuredCadence;
     private EditText etManualCadence;
     private Button btnMeasureCadence;
@@ -77,6 +81,9 @@ public class ClinicianActivity extends AppCompatActivity {
         rgCadenceMethod = findViewById(R.id.rgCadenceMethod);
         rbManualCadence = findViewById(R.id.rbManualCadence);
         rbPatternCadence = findViewById(R.id.rbPatternCadence);
+        rgPatternMode = findViewById(R.id.rgPatternMode);
+        rbPatternWhole = findViewById(R.id.rbPatternWhole);
+        rbPatternMean = findViewById(R.id.rbPatternMean);
         etManualCadence = findViewById(R.id.etManualCadence);
         etPatientCode = findViewById(R.id.etPatientCode);
         btnMeasureCadence = findViewById(R.id.btnMeasureCadence);
@@ -128,7 +135,8 @@ public class ClinicianActivity extends AppCompatActivity {
 
     // Abilita/disabilita campi in base al metodo di cadenza scelto
     private void updateCadenceMethod() {
-         etManualCadence.setEnabled(rbManualCadence.isChecked());
+        etManualCadence.setEnabled(rbManualCadence.isChecked());
+        rgPatternMode.setVisibility(rbPatternCadence.isChecked() ? View.VISIBLE : View.GONE);
     }
 
     // Avvia la misurazione della cadenza tramite sensori
@@ -184,6 +192,14 @@ public class ClinicianActivity extends AppCompatActivity {
             }
             data.setCadencePattern(pattern);
             bestCadence = 60f; // dummy fallback to avoid 0 division later
+
+            // Save selection: true = mean, false = full
+            boolean useMean = rbPatternMean.isChecked();
+            getSharedPreferences("mSWAYPrefs", MODE_PRIVATE)
+                    .edit()
+                    .putBoolean("pattern_use_mean", useMean)
+                    .apply();
+
         } else {
             cadenceMode = "manual";
             String cadenceStr = etManualCadence.getText().toString().trim();

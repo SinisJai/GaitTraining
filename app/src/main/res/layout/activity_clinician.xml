@@ -107,18 +107,19 @@
                         style="@style/SectionTitle"
                         android:layout_marginBottom="16dp"/>
 
+                    <EditText
+                        android:id="@+id/etManualCadence"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/enter_cadence_steps_per_minute"
+                        android:inputType="numberDecimal"
+                        android:layout_marginTop="8dp"/>
+
                     <RadioGroup
                         android:id="@+id/rgCadenceMethod"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
-
-                        <RadioButton
-                            android:id="@+id/rbPatternCadence"
-                            style="@style/RadioButtonOption"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/stored_cadence" />
 
                         <RadioButton
                             android:id="@+id/rbManualCadence"
@@ -127,15 +128,41 @@
                             android:layout_height="wrap_content"
                             android:text="@string/manual_cadence_entry"
                             android:checked="true"/>
+
+                        <RadioButton
+                            android:id="@+id/rbPatternCadence"
+                            style="@style/RadioButtonOption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/stored_cadence" />
+
                     </RadioGroup>
 
-                    <EditText
-                        android:id="@+id/etManualCadence"
+
+                    <!-- New: RadioGroup for pattern mode -->
+                    <RadioGroup
+                        android:id="@+id/rgPatternMode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/enter_cadence_steps_per_minute"
-                        android:inputType="numberDecimal"
-                        android:layout_marginTop="8dp"/>
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        android:layout_marginTop="16dp">
+
+                        <RadioButton
+                            android:id="@+id/rbPatternWhole"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Whole rhythm (follow pattern)"
+                            android:checked="true" />
+
+                        <RadioButton
+                            android:id="@+id/rbPatternMean"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Mean cadence (fixed interval)" />
+                    </RadioGroup>
+
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
