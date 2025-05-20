@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_MSWAY);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);// Abilita il supporto alla visualizzazione edge-to-edge
         setContentView(R.layout.activity_main); // Imposta il layout dell’interfaccia principale

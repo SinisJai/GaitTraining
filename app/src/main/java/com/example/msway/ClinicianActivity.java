@@ -25,9 +25,9 @@ public class ClinicianActivity extends AppCompatActivity {
     private SeekBar sbTrainingDuration;
     private RadioGroup rgCadenceMethod;
     private RadioButton rbManualCadence;
-    private RadioButton rbSensorCadence;
     private RadioButton rbPatternCadence;
 
+    private TextView tvMeasuredCadence;
     private EditText etManualCadence;
     private Button btnMeasureCadence;
     private Button btnSave;
@@ -42,6 +42,7 @@ public class ClinicianActivity extends AppCompatActivity {
     // Variabili di stato
     private int trainingDuration = 30; // Default 30 minuti
     private float bestCadence = 0;
+    private float measuredCadence = 0;
     private boolean isMeasuringSensors = false;
     private User loggedInClinician;
 
@@ -75,11 +76,11 @@ public class ClinicianActivity extends AppCompatActivity {
         sbTrainingDuration = findViewById(R.id.sbTrainingDuration);
         rgCadenceMethod = findViewById(R.id.rgCadenceMethod);
         rbManualCadence = findViewById(R.id.rbManualCadence);
-        rbSensorCadence = findViewById(R.id.rbSensorCadence);
         rbPatternCadence = findViewById(R.id.rbPatternCadence);
         etManualCadence = findViewById(R.id.etManualCadence);
         etPatientCode = findViewById(R.id.etPatientCode);
         btnMeasureCadence = findViewById(R.id.btnMeasureCadence);
+        tvMeasuredCadence = findViewById(R.id.tvMeasuredCadence);
         btnSave = findViewById(R.id.btnSave);
         btnLogout = findViewById(R.id.btnLogout);
 
@@ -127,18 +128,7 @@ public class ClinicianActivity extends AppCompatActivity {
 
     // Abilita/disabilita campi in base al metodo di cadenza scelto
     private void updateCadenceMethod() {
-        if (rbManualCadence.isChecked()) {
-            etManualCadence.setEnabled(true);
-            btnMeasureCadence.setEnabled(false);
-            stopSensorMeasurement();
-        } else if (rbSensorCadence.isChecked()) {
-            etManualCadence.setEnabled(false);
-            btnMeasureCadence.setEnabled(true);
-        } else if (rbPatternCadence.isChecked()) {
-            etManualCadence.setEnabled(false);
-            btnMeasureCadence.setEnabled(false);
-            stopSensorMeasurement();
-        }
+         etManualCadence.setEnabled(rbManualCadence.isChecked());
     }
 
     // Avvia la misurazione della cadenza tramite sensori
@@ -152,10 +142,8 @@ public class ClinicianActivity extends AppCompatActivity {
         btnMeasureCadence.setText(R.string.stop_measuring);
 
         sensorManager.startMeasuring(cadence -> runOnUiThread(() -> {
-            bestCadence = cadence;
-            Toast.makeText(ClinicianActivity.this,
-                    getString(R.string.cadence_measured, bestCadence),
-                    Toast.LENGTH_SHORT).show();
+            measuredCadence = cadence;
+            tvMeasuredCadence.setText(getString(R.string.cadence_measured, measuredCadence));
         }));
 
         Toast.makeText(this, R.string.measuring_cadence, Toast.LENGTH_SHORT).show();
@@ -195,9 +183,7 @@ public class ClinicianActivity extends AppCompatActivity {
                 return;
             }
             data.setCadencePattern(pattern);
-            bestCadence = 60; // dummy fallback to avoid 0 division later
-        } else if (rbSensorCadence.isChecked()) {
-            cadenceMode = "sensor";
+            bestCadence = 60f; // dummy fallback to avoid 0 division later
         } else {
             cadenceMode = "manual";
             String cadenceStr = etManualCadence.getText().toString().trim();

@@ -25,11 +25,14 @@ public class SensorManager implements SensorEventListener {
 
     private boolean isMeasuring = false;
     private List<Long> stepTimestamps = new ArrayList<>();
+
+    private List<Long> stepIntervals = new ArrayList<>(); // store deltas
+
     private float currentCadence = 0;
 
     // Thresholds for step detection
     private static final float ACCELERATION_THRESHOLD = 10.0f;
-    private static final long MIN_STEP_INTERVAL_MS = 200; // Minimum time between steps
+    private static final long MIN_STEP_INTERVAL_MS = 400; // Minimum time between steps
 
     // Variables for step detection
     private float prevAcceleration = 0;
@@ -71,6 +74,7 @@ public class SensorManager implements SensorEventListener {
 
         // Reset variables
         stepTimestamps.clear();
+        stepIntervals.clear();
         lastStepTime = 0;
         currentCadence = 0;
 
@@ -120,6 +124,11 @@ public class SensorManager implements SensorEventListener {
         if (acceleration > ACCELERATION_THRESHOLD && prevAcceleration <= ACCELERATION_THRESHOLD
                 && (currentTime - lastStepTime) > MIN_STEP_INTERVAL_MS) {
 
+            if (lastStepTime != 0) {
+                long interval = currentTime - lastStepTime;
+                stepIntervals.add(interval); //  Save step interval
+            }
+
             // Record this as a step
             lastStepTime = currentTime;
             stepTimestamps.add(currentTime);
@@ -165,5 +174,9 @@ public class SensorManager implements SensorEventListener {
                 listener.onCadenceMeasured(currentCadence);
             }
         }
+    }
+
+    public List<Long> getStepIntervals() {
+        return new ArrayList<>(stepIntervals);
     }
 }

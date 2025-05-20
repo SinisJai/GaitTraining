@@ -139,12 +139,21 @@ public class TrainingActivity extends AppCompatActivity {
                 finish();
                 return;
             }
+            // Even in pattern mode, compute mean for music
+            targetCadence = calculateMeanCadence(rhythmPattern);
         } else {
             targetCadence = patientData.getBestCadence();
-            SharedPreferences prefs = getSharedPreferences("mSWAYPrefs", MODE_PRIVATE);
-            prefs.edit().putFloat("target_cadence", targetCadence).apply(); // 🆕 save to prefs
-            // Calcola intervallo ritmo in ms basato sulla cadenza
-            // Cadenza è passi al minuto, quindi va convertito in intervallo tra passi
+        }
+
+        // Store for global access (background music uses SharedPrefs)
+        SharedPreferences prefs = getSharedPreferences("mSWAYPrefs", MODE_PRIVATE);
+        prefs.edit().putFloat("target_cadence", targetCadence).apply(); // 🆕 save to prefs
+
+        // In mean mode, also compute rhythmInterval
+        // Calcola intervallo ritmo in ms basato sulla cadenza
+        // Cadenza è passi al minuto, quindi va convertito in intervallo tra passi
+
+        if (!"pattern".equals(mode)) {
             rhythmInterval = (long)((float) ((float)60000 / targetCadence));
         }
 
@@ -167,6 +176,15 @@ public class TrainingActivity extends AppCompatActivity {
         // Show countdown and start training
         startCountdown(); // Mostra conto alla rovescia prima di iniziare
     }
+
+    private float calculateMeanCadence(List<Long> pattern) {
+        if (pattern == null || pattern.isEmpty()) return 100f; // fallback
+        long sum = 0;
+        for (Long ms : pattern) sum += ms;
+        float avgMs = sum / (float) pattern.size();
+        return 60000f / avgMs;
+    }
+
 
     // Conto alla rovescia iniziale
     private void startCountdown() {

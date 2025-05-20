@@ -51,6 +51,16 @@ public class DataManager {
             json.put("trainingDuration", patientData.getTrainingDuration());
             json.put("bestCadence", patientData.getBestCadence());
             json.put("lastModifiedBy", patientData.getLastModifiedBy());
+            json.put("cadenceMode", patientData.getCadenceMode());
+
+            // Save pattern if present
+            if (patientData.getCadencePattern() != null) {
+                JSONArray patternArray = new JSONArray();
+                for (Long interval : patientData.getCadencePattern()) {
+                    patternArray.put(interval);
+                }
+                json.put("cadencePattern", patternArray);
+            }
 
             FileWriter writer = new FileWriter(patientDataFile);
             writer.write(json.toString());
@@ -85,8 +95,17 @@ public class DataManager {
             patientData.setPatientCode(json.getString("patientCode"));
             patientData.setTrainingDuration(json.getInt("trainingDuration"));
             patientData.setBestCadence((float) json.getDouble("bestCadence"));
-            if (json.has("lastModifiedBy")) {
+            if (json.has("lastModifiedBy"))
                 patientData.setLastModifiedBy(json.getString("lastModifiedBy"));
+            if (json.has("cadenceMode"))
+                patientData.setCadenceMode(json.getString("cadenceMode"));
+            if (json.has("cadencePattern")) {
+                JSONArray arr = json.getJSONArray("cadencePattern");
+                List<Long> pattern = new ArrayList<>();
+                for (int i = 0; i < arr.length(); i++) {
+                    pattern.add(arr.getLong(i));
+                }
+                patientData.setCadencePattern(pattern);
             }
 
             return patientData;

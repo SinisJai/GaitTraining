@@ -52,7 +52,8 @@
             android:parentActivityName=".LoginActivity" />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.MSWAY.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
