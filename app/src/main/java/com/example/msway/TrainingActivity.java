@@ -222,7 +222,8 @@ public class TrainingActivity extends AppCompatActivity {
             public void run() {
                 if (!isTrainingActive || intervalIndex >= patternList.size()) return;
                 // single‐shot beep via SoundPool
-                audioManager.playRhythmSound();
+                String dir = (intervalIndex % 2 == 0) ? "L" : "R";
+                audioManager.playRhythmSound(dir);
                 long next = patternList.get(intervalIndex++);
                 rhythmHandler.postDelayed(this, next);
             }

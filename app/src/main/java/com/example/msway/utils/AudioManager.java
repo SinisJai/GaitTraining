@@ -112,7 +112,7 @@ public class AudioManager {
      +     * Schedule rhythmic beeps at the specified intervals using SoundPool.
      +     * @param rhythmPattern list of intervals (ms) between beeps.
      +     */
-    public void playRhythmSound () {
+    public void playRhythmSound (String direction) {
         // Cancel any pending schedules
         scheduler.shutdownNow();
         scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -120,7 +120,17 @@ public class AudioManager {
         SharedPreferences prefs = context.getSharedPreferences("mSWAYPrefs", Context.MODE_PRIVATE);
         float rhythmVolume = prefs.getFloat("rhythm_volume", 1.0f);
         float v = Math.max(0.3f, Math.min(1.0f, rhythmVolume));
-        soundPool.play(beepSoundId, v, v, 1, 0, 1f);
+
+        float left = 1f, right = 1f;
+        if ("L".equals(direction)) {
+            left = v;
+            right = 0.2f;
+        } else if ("R".equals(direction)) {
+            left = 0.2f;
+            right = v;
+        }
+
+        soundPool.play(beepSoundId, left, right, 1, 0, 1f);
     }
 
     public void release() {
